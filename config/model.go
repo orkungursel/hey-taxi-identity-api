@@ -40,6 +40,8 @@ type (
 		PublicKeyFile   string `mapstructure:"auth_public_key_file"`
 		AccessTokenExp  int    `mapstructure:"auth_access_token_exp"`
 		RefreshTokenExp int    `mapstructure:"auth_refresh_token_exp"`
-		DatabaseName    string `mapstructure:"auth_collection_name"`
+		DatabaseName    string `mapstructure:"auth_database_name"`
+		CollectionName  string `mapstructure:"auth_collection_name"`
+		Issuer          string `mapstructure:"auth_issuer"`
 	}
 )

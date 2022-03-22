@@ -8,11 +8,11 @@ func defaults() *Config {
 		Redis:  Redis{Addr: "localhost:6379", MaxRetries: 3},
 		Mongo:  Mongo{Uri: "mongodb://root:root@localhost:27017", ConnectionTimeout: 10},
 		Auth: Auth{
+			Issuer:          "hey-taxi-identity-api",
 			AccessTokenExp:  3600,
 			RefreshTokenExp: 86400,
-			PrivateKeyFile:  "../certs/private.pem",
-			PublicKeyFile:   "../certs/public.pem",
-			DatabaseName:    "users",
+			DatabaseName:    "auth",
+			CollectionName:  "users",
 		},
 	}
 }
