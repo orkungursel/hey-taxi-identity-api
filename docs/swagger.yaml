@@ -1,0 +1,12 @@
+basePath: /api/v1
+info:
+  contact:
+    name: Orkun Gürsel
+    url: https://github.com/orkungursel
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: Hey Taxi Identity API
+  version: "1.0"
+paths: {}
+swagger: "2.0"
