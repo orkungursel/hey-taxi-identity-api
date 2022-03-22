@@ -93,12 +93,12 @@ func TestConfig_GetMode(t *testing.T) {
 		want string
 	}{
 		{
-			name: "get mode",
+			name: "should return development mode",
 			c:    NewConfigWithFile(""),
 			want: "local",
 		},
 		{
-			name: "get mode",
+			name: "should return production mode",
 			c:    NewConfigWithFile(""),
 			want: "production",
 			env:  "production",
