@@ -10,9 +10,9 @@
 			"request": "launch",
 			"mode": "auto",
 			"program": "${workspaceFolder}/cmd/main.go",
-      "buildFlags": "-tags swagger",
+			"buildFlags": "-tags swagger",
 			"env": {
-        "SERVER_HOST": "localhost"
+				"SERVER_HOST": "localhost"
 			}
 		}
 	]
