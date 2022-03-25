@@ -1,0 +1,28 @@
+@hostname = http://localhost
+@port = 8080
+@suffix = /api/v1
+@url = {{hostname}}:{{port}}{{suffix}}
+@contentType = application/json
+
+### Login
+POST {{url}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "orquncom4@gmail.com",
+  "password": "strsaadsa"
+}
+
+### Me
+GET {{url}}/auth/me
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+### Register
+POST {{url}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "email": "orquncom4@gmail.com",
+  "password": "strsadsa"
+}
