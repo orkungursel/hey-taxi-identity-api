@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/orkungursel/hey-taxi-identity-api/config"
+	auth "github.com/orkungursel/hey-taxi-identity-api/internal/api/http"
 	"github.com/orkungursel/hey-taxi-identity-api/pkg/logger"
 	"github.com/orkungursel/hey-taxi-identity-api/pkg/mongo"
 	"github.com/orkungursel/hey-taxi-identity-api/pkg/server"
@@ -43,6 +44,9 @@ func main() {
 	defer mongoClient.Disconnect(ctx)
 
 	s := server.New(ctx, config, logger)
+
+	// initialize auth api
+	auth.Api(config, s, mongoClient)
 
 	// initialize swagger
 	swagger.Api(s)
