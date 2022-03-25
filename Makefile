@@ -6,7 +6,7 @@ run:
 build:
 	rm -rf ./bin/ &&  mkdir -p ./bin/ && go build -ldflags="-s -w" -trimpath -o bin/main cmd/main.go
 
-swagger:
+swagger: swagger-fmt
 	swag init -g ./pkg/server/swagger/doc.go -pd --parseDepth 2
 
 swagger-fmt:
