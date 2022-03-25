@@ -10,6 +10,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+	app "github.com/orkungursel/hey-taxi-identity-api/internal/app"
 	model "github.com/orkungursel/hey-taxi-identity-api/internal/domain/model"
 )
 
@@ -34,21 +35,6 @@ func NewMockTokenService(ctrl *gomock.Controller) *MockTokenService {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockTokenService) EXPECT() *MockTokenServiceMockRecorder {
 	return m.recorder
-}
-
-// ExtractFromRequest mocks base method.
-func (m *MockTokenService) ExtractFromRequest(ctx context.Context, r *http.Request) (map[string]interface{}, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ExtractFromRequest", ctx, r)
-	ret0, _ := ret[0].(map[string]interface{})
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ExtractFromRequest indicates an expected call of ExtractFromRequest.
-func (mr *MockTokenServiceMockRecorder) ExtractFromRequest(ctx, r interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExtractFromRequest", reflect.TypeOf((*MockTokenService)(nil).ExtractFromRequest), ctx, r)
 }
 
 // GenerateAccessToken mocks base method.
@@ -81,30 +67,17 @@ func (mr *MockTokenServiceMockRecorder) GenerateRefreshToken(ctx, user interface
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenerateRefreshToken", reflect.TypeOf((*MockTokenService)(nil).GenerateRefreshToken), ctx, user)
 }
 
-// ValidateAccessToken mocks base method.
-func (m *MockTokenService) ValidateAccessToken(ctx context.Context, token string) error {
+// ValidateAccessTokenFromRequest mocks base method.
+func (m *MockTokenService) ValidateAccessTokenFromRequest(ctx context.Context, r *http.Request) (app.Claims, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ValidateAccessToken", ctx, token)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret := m.ctrl.Call(m, "ValidateAccessTokenFromRequest", ctx, r)
+	ret0, _ := ret[0].(app.Claims)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
-// ValidateAccessToken indicates an expected call of ValidateAccessToken.
-func (mr *MockTokenServiceMockRecorder) ValidateAccessToken(ctx, token interface{}) *gomock.Call {
+// ValidateAccessTokenFromRequest indicates an expected call of ValidateAccessTokenFromRequest.
+func (mr *MockTokenServiceMockRecorder) ValidateAccessTokenFromRequest(ctx, r interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateAccessToken", reflect.TypeOf((*MockTokenService)(nil).ValidateAccessToken), ctx, token)
-}
-
-// ValidateRefreshToken mocks base method.
-func (m *MockTokenService) ValidateRefreshToken(ctx context.Context, token string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ValidateRefreshToken", ctx, token)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// ValidateRefreshToken indicates an expected call of ValidateRefreshToken.
-func (mr *MockTokenServiceMockRecorder) ValidateRefreshToken(ctx, token interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateRefreshToken", reflect.TypeOf((*MockTokenService)(nil).ValidateRefreshToken), ctx, token)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateAccessTokenFromRequest", reflect.TypeOf((*MockTokenService)(nil).ValidateAccessTokenFromRequest), ctx, r)
 }

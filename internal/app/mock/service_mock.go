@@ -36,10 +36,10 @@ func (m *MockService) EXPECT() *MockServiceMockRecorder {
 }
 
 // Login mocks base method.
-func (m *MockService) Login(ctx context.Context, r *app.LoginRequest) (*app.LoginResponse, error) {
+func (m *MockService) Login(ctx context.Context, r *app.LoginRequest) (*app.SuccessAuthResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Login", ctx, r)
-	ret0, _ := ret[0].(*app.LoginResponse)
+	ret0, _ := ret[0].(*app.SuccessAuthResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -51,10 +51,10 @@ func (mr *MockServiceMockRecorder) Login(ctx, r interface{}) *gomock.Call {
 }
 
 // Register mocks base method.
-func (m *MockService) Register(ctx context.Context, r *app.RegisterRequest) (*app.LoginResponse, error) {
+func (m *MockService) Register(ctx context.Context, r *app.RegisterRequest) (*app.SuccessAuthResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Register", ctx, r)
-	ret0, _ := ret[0].(*app.LoginResponse)
+	ret0, _ := ret[0].(*app.SuccessAuthResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
