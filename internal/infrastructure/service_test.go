@@ -10,13 +10,34 @@ import (
 	"github.com/orkungursel/hey-taxi-identity-api/config"
 	"github.com/orkungursel/hey-taxi-identity-api/internal/app"
 	"github.com/orkungursel/hey-taxi-identity-api/internal/app/mock"
+	. "github.com/orkungursel/hey-taxi-identity-api/internal/app/mock"
 	"github.com/orkungursel/hey-taxi-identity-api/internal/domain/model"
+	. "github.com/orkungursel/hey-taxi-identity-api/internal/infrastructure/mock"
 	. "github.com/orkungursel/hey-taxi-identity-api/mock"
 	"github.com/orkungursel/hey-taxi-identity-api/pkg/logger"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+var (
+	dummyUser = &model.User{
+		Id:       primitive.NewObjectID(),
+		Email:    "foo@bar.com",
+		Password: "password",
+	}
+	dummyUser2 = &model.User{
+		Id:       primitive.NewObjectID(),
+		Email:    "foo2@bar.com",
+		Password: "123456",
+	}
+)
+
 func TestNewService(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	ts := NewMockTokenService(ctrl)
+	pws := NewMockIPasswordService(ctrl)
+
 	type args struct {
 		config *config.Config
 		logger logger.ILogger
@@ -31,7 +52,7 @@ func TestNewService(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewService(tt.args.config, tt.args.logger, tt.args.repo); !reflect.DeepEqual(got, tt.want) {
+			if got := NewService(tt.args.config, tt.args.logger, tt.args.repo, ts, pws); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewService() = %v, want %v", got, tt.want)
 			}
 		})
@@ -39,8 +60,6 @@ func TestNewService(t *testing.T) {
 }
 
 func TestService_Login(t *testing.T) {
-	t.Parallel()
-
 	config := config.NewConfig()
 	logger := NewLoggerMock()
 
@@ -48,20 +67,32 @@ func TestService_Login(t *testing.T) {
 	defer ctrl.Finish()
 
 	repo := mock.NewMockRepository(ctrl)
-	service := NewService(config, logger, repo)
+	ts := NewMockTokenService(ctrl)
+	pws := NewMockIPasswordService(ctrl)
 
-	u := &model.User{
-		UserID:   primitive.NewObjectID(),
-		Email:    "foo@bar.com",
-		Password: "password",
-	}
+	service := NewService(config, logger, repo, ts, pws)
 	ctx := context.Background()
+
 	repo.EXPECT().GetUserByEmail(ctx, gomock.Any()).
 		DoAndReturn(func(_ context.Context, email string) (*model.User, error) {
-			if email == u.Email {
-				return u, nil
+			if email == dummyUser.Email {
+				return dummyUser, nil
 			}
 			return nil, errors.New("not found")
+		}).AnyTimes()
+
+	ts.EXPECT().GenerateAccessToken(ctx, dummyUser).
+		Return("access_token", nil).AnyTimes().MinTimes(1)
+
+	ts.EXPECT().GenerateRefreshToken(ctx, dummyUser).
+		Return("refresh_token", nil).AnyTimes().MinTimes(1)
+
+	pws.EXPECT().Compare(ctx, dummyUser.Password, gomock.Any()).
+		DoAndReturn(func(_ context.Context, hashedPassword string, password string) error {
+			if password == hashedPassword {
+				return nil
+			}
+			return errors.New("not match")
 		}).AnyTimes()
 
 	type args struct {
@@ -72,7 +103,7 @@ func TestService_Login(t *testing.T) {
 		name    string
 		args    args
 		svc     app.Service
-		want    *app.LoginResponse
+		want    *app.SuccessAuthResponse
 		wantErr bool
 	}{
 		{
@@ -80,12 +111,14 @@ func TestService_Login(t *testing.T) {
 			svc:  service,
 			args: args{
 				ctx: ctx,
-				req: &app.LoginRequest{Email: u.Email, Password: u.Password},
+				req: &app.LoginRequest{Email: dummyUser.Email, Password: dummyUser.Password},
 			},
-			want: &app.LoginResponse{
-				Token:        "token",
-				RefreshToken: "refresh_token",
-				ExpiresIn:    config.Auth.AccessTokenExp,
+			want: &app.SuccessAuthResponse{
+				UserDto:               *app.UserResponseFromUser(dummyUser),
+				AccessToken:           "access_token",
+				RefreshToken:          "refresh_token",
+				AccessTokenExpiresIn:  config.Jwt.AccessTokenExp,
+				RefreshTokenExpiresIn: config.Jwt.RefreshTokenExp,
 			},
 		},
 		{
@@ -93,7 +126,7 @@ func TestService_Login(t *testing.T) {
 			svc:  service,
 			args: args{
 				ctx: ctx,
-				req: &app.LoginRequest{Email: u.Email, Password: "123456"},
+				req: &app.LoginRequest{Email: dummyUser.Email, Password: "123456"},
 			},
 			wantErr: true,
 		},
@@ -111,7 +144,7 @@ func TestService_Login(t *testing.T) {
 			svc:  service,
 			args: args{
 				ctx: ctx,
-				req: &app.LoginRequest{Email: "foo2@bar.com", Password: "123456"},
+				req: &app.LoginRequest{Email: "foo3@bar.com", Password: "123456"},
 			},
 			wantErr: true,
 		},
@@ -131,8 +164,6 @@ func TestService_Login(t *testing.T) {
 }
 
 func TestService_Register(t *testing.T) {
-	t.Parallel()
-
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -140,10 +171,33 @@ func TestService_Register(t *testing.T) {
 	logger := NewLoggerMock()
 
 	repo := mock.NewMockRepository(ctrl)
-	service := NewService(config, logger, repo)
+	ts := NewMockTokenService(ctrl)
+	pws := NewMockIPasswordService(ctrl)
+
+	service := NewService(config, logger, repo, ts, pws)
 
 	ctx := context.Background()
-	repo.EXPECT().CreateUser(ctx, gomock.AssignableToTypeOf(&model.User{})).Return(nil).Times(1)
+	repo.EXPECT().CreateUser(ctx, gomock.AssignableToTypeOf(&model.User{})).
+		Return(dummyUser2.Id.Hex(), nil).Times(1)
+
+	repo.EXPECT().GetUserByEmail(ctx, gomock.Any()).
+		DoAndReturn(func(_ context.Context, email string) (*model.User, error) {
+			if email == dummyUser.Email {
+				return dummyUser, nil
+			}
+			return nil, errors.New("not found")
+		}).AnyTimes()
+
+	ts.EXPECT().GenerateAccessToken(ctx, gomock.Any()).
+		Return("access_token", nil).AnyTimes().MinTimes(1)
+
+	ts.EXPECT().GenerateRefreshToken(ctx, gomock.Any()).
+		Return("refresh_token", nil).AnyTimes().MinTimes(1)
+
+	pws.EXPECT().Hash(ctx, gomock.Any()).
+		DoAndReturn(func(_ context.Context, password string) (string, error) {
+			return password, nil
+		}).AnyTimes().MinTimes(1)
 
 	type args struct {
 		ctx context.Context
@@ -153,24 +207,35 @@ func TestService_Register(t *testing.T) {
 		name    string
 		args    args
 		svc     app.Service
-		want    *app.LoginResponse
+		want    *app.SuccessAuthResponse
 		wantErr bool
 	}{
 		{
-			name: "register",
+			name: "should return token",
 			svc:  service,
 			args: args{
 				ctx: ctx,
-				req: &app.RegisterRequest{Email: "foo@bar.com", Password: "123456"},
+				req: &app.RegisterRequest{Email: dummyUser2.Email, Password: dummyUser2.Password},
 			},
-			want: &app.LoginResponse{
-				Token:        "token",
-				RefreshToken: "refresh_token",
-				ExpiresIn:    config.Auth.AccessTokenExp,
+			want: &app.SuccessAuthResponse{
+				UserDto:               *app.UserResponseFromUser(dummyUser2),
+				AccessToken:           "access_token",
+				RefreshToken:          "refresh_token",
+				AccessTokenExpiresIn:  config.Jwt.AccessTokenExp,
+				RefreshTokenExpiresIn: config.Jwt.RefreshTokenExp,
 			},
 		},
 		{
-			name: "register",
+			name: "should error when email is already registered",
+			svc:  service,
+			args: args{
+				ctx: ctx,
+				req: &app.RegisterRequest{Email: dummyUser.Email, Password: "123456"},
+			},
+			wantErr: true,
+		},
+		{
+			name: "should error when email is empty",
 			svc:  service,
 			args: args{
 				ctx: ctx,
@@ -179,8 +244,8 @@ func TestService_Register(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name: "should error when password is empty",
 			svc:  service,
-			name: "register",
 			args: args{
 				ctx: ctx,
 				req: &app.RegisterRequest{Email: "foo@bar.com"},
@@ -197,6 +262,72 @@ func TestService_Register(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Service.Register() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestService_Me(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	config := config.NewConfig()
+	logger := NewLoggerMock()
+
+	repo := mock.NewMockRepository(ctrl)
+	ts := NewMockTokenService(ctrl)
+	pws := NewMockIPasswordService(ctrl)
+
+	service := NewService(config, logger, repo, ts, pws)
+
+	ctx := context.Background()
+	repo.EXPECT().GetUser(ctx, gomock.Any()).
+		DoAndReturn(func(_ context.Context, uid string) (*model.User, error) {
+			if uid == dummyUser.GetIdString() {
+				return dummyUser, nil
+			}
+			return nil, errors.New("not found")
+		}).AnyTimes().MinTimes(1)
+
+	type args struct {
+		ctx context.Context
+		req string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		svc     app.Service
+		want    *app.UserResponse
+		wantErr bool
+	}{
+		{
+			name: "should return user",
+			svc:  service,
+			args: args{
+				ctx: ctx,
+				req: dummyUser.GetIdString(),
+			},
+			want: app.UserResponseFromUser(dummyUser),
+		},
+		{
+			name: "should error when user not found",
+			svc:  service,
+			args: args{
+				ctx: ctx,
+				req: dummyUser2.GetIdString(),
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := tt.svc.Me(tt.args.ctx, tt.args.req)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Service.Me() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Service.Me() = %v, want %v", got, tt.want)
 			}
 		})
 	}

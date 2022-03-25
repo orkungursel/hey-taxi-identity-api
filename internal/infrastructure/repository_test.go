@@ -141,7 +141,8 @@ func TestRepository_CreateUser(t *testing.T) {
 				logger:     tt.fields.logger,
 				db:         tt.fields.db,
 			}
-			if err := r.CreateUser(tt.args.ctx, tt.args.user); (err != nil) != tt.wantErr {
+			_, err := r.CreateUser(tt.args.ctx, tt.args.user)
+			if (err != nil) != tt.wantErr {
 				t.Errorf("Repository.CreateUser() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
