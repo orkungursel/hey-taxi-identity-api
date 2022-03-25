@@ -11,7 +11,5 @@ import (
 type TokenService interface {
 	GenerateAccessToken(ctx context.Context, user *model.User) (string, error)
 	GenerateRefreshToken(ctx context.Context, user *model.User) (string, error)
-	ValidateAccessToken(ctx context.Context, token string) error
-	ValidateRefreshToken(ctx context.Context, token string) error
-	ExtractFromRequest(ctx context.Context, r *http.Request) (map[string]interface{}, error)
+	ValidateAccessTokenFromRequest(ctx context.Context, r *http.Request) (Claims, error)
 }

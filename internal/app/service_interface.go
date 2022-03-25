@@ -7,6 +7,7 @@ import (
 )
 
 type Service interface {
-	Login(ctx context.Context, r *LoginRequest) (*LoginResponse, error)
-	Register(ctx context.Context, r *RegisterRequest) (*LoginResponse, error)
+	Login(ctx context.Context, r *LoginRequest) (*SuccessAuthResponse, error)
+	Register(ctx context.Context, r *RegisterRequest) (*SuccessAuthResponse, error)
+	Me(ctx context.Context, uid string) (*UserResponse, error)
 }
