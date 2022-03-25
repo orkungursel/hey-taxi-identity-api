@@ -11,6 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type Repository struct {
@@ -24,7 +25,8 @@ func NewRepository(config *config.Config, logger logger.ILogger, db *mongo.Clien
 	return &Repository{
 		config: config,
 		logger: logger,
-		db:     db.Database(config.Auth.DatabaseName, nil).Collection("users"),
+		db: db.Database(config.Auth.DatabaseName, nil).
+			Collection(config.Auth.CollectionName),
 	}
 }
 
@@ -36,7 +38,8 @@ func (r *Repository) GetUser(ctx context.Context, id string) (*model.User, error
 		return nil, errors.Wrap(err, "invalid id")
 	}
 
-	res := r.db.FindOne(ctx, bson.M{"_id": objectId}, nil)
+	opts := options.FindOne()
+	res := r.db.FindOne(ctx, bson.M{"_id": objectId}, opts)
 	if err := res.Err(); err != nil {
 		r.logger.Warnf("error while getting user: %s", err)
 		return nil, errors.Wrap(err, "error while finding user")
@@ -58,29 +61,28 @@ func (r *Repository) GetUserByEmail(ctx context.Context, email string) (*model.U
 		return nil, errors.New("empty email")
 	}
 
-	res := r.db.FindOne(ctx, bson.M{"email": email}, nil)
-	if err := res.Err(); err != nil {
-		r.logger.Warnf("error while getting user: %s", err)
-		return nil, errors.Wrap(err, "error while finding user")
-	}
-
 	u := &model.User{}
-	if err := res.Decode(u); err != nil {
-		r.logger.Warnf("error while decoding user: %s", err)
-		return nil, err
+	filter := bson.M{"email": email}
+	options := options.FindOne()
+
+	err := r.db.FindOne(ctx, filter, options).Decode(u)
+	if err != nil {
+		return nil, errors.New("user not found")
 	}
 
 	return u, nil
 }
 
 // CreateUser creates a new user
-func (r *Repository) CreateUser(ctx context.Context, user *model.User) error {
-	if _, err := r.db.InsertOne(ctx, user); err != nil {
+func (r *Repository) CreateUser(ctx context.Context, user *model.User) (string, error) {
+	opts := options.InsertOne()
+	res, err := r.db.InsertOne(ctx, user, opts)
+	if err != nil {
 		r.logger.Warnf("error while creating user: %s", err)
-		return errors.Wrap(err, "error while creating user")
+		return "", errors.Wrap(err, "error while creating user")
 	}
 
-	return nil
+	return res.InsertedID.(primitive.ObjectID).Hex(), nil
 }
 
 func (r *Repository) UpdateUser(ctx context.Context, id string, user *model.User) error {

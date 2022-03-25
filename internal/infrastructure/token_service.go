@@ -15,17 +15,13 @@ import (
 	"github.com/pkg/errors"
 )
 
-type Claims struct {
-	Role string `json:"role"`
-	jwt.StandardClaims
-}
-
 type TokenService struct {
-	app.TokenService
-	config                *config.Config
-	logger                logger.ILogger
-	accessTokenPrivateKey *rsa.PrivateKey
-	accessTokenPublicKey  *rsa.PublicKey
+	config                 *config.Config
+	logger                 logger.ILogger
+	accessTokenPrivateKey  *rsa.PrivateKey
+	accessTokenPublicKey   *rsa.PublicKey
+	refreshTokenPrivateKey *rsa.PrivateKey
+	refreshTokenPublicKey  *rsa.PublicKey
 }
 
 func NewTokenService(config *config.Config, logger logger.ILogger) (s *TokenService) {
@@ -41,45 +37,63 @@ func NewTokenService(config *config.Config, logger logger.ILogger) (s *TokenServ
 
 func (s *TokenService) init() *TokenService {
 	// get private key from file
-	b, err := ioutil.ReadFile(s.config.Auth.PrivateKeyFile)
+	b, err := ioutil.ReadFile(s.config.Jwt.AccessTokenPrivateKeyFile)
 	if err != nil {
 		panic(err)
 	}
 
-	privKey, err := jwt.ParseRSAPrivateKeyFromPEM(b)
+	atprk, err := jwt.ParseRSAPrivateKeyFromPEM(b)
 	if err != nil {
 		panic(err)
 	}
 
-	if privKey == nil {
-		panic("private key is nil")
-	}
-
-	s.accessTokenPrivateKey = privKey
+	s.accessTokenPrivateKey = atprk
 
 	// get public key from file
-	b, err = ioutil.ReadFile(s.config.Auth.PublicKeyFile)
+	b, err = ioutil.ReadFile(s.config.Jwt.AccessTokenPublicKeyFile)
 	if err != nil {
 		panic(err)
 	}
 
-	publicKey, err := jwt.ParseRSAPublicKeyFromPEM(b)
+	atpuk, err := jwt.ParseRSAPublicKeyFromPEM(b)
 	if err != nil {
 		panic(err)
 	}
 
-	if publicKey == nil {
-		panic("private key is nil")
+	s.accessTokenPublicKey = atpuk
+
+	// get private key from file
+	b, err = ioutil.ReadFile(s.config.Jwt.RefreshTokenPrivateKeyFile)
+	if err != nil {
+		panic(err)
 	}
 
-	s.accessTokenPublicKey = publicKey
+	rtprk, err := jwt.ParseRSAPrivateKeyFromPEM(b)
+	if err != nil {
+		panic(err)
+	}
+
+	s.refreshTokenPrivateKey = rtprk
+
+	// get public key from file
+	b, err = ioutil.ReadFile(s.config.Jwt.RefreshTokenPublicKeyFile)
+	if err != nil {
+		panic(err)
+	}
+
+	rtpuk, err := jwt.ParseRSAPublicKeyFromPEM(b)
+	if err != nil {
+		panic(err)
+	}
+
+	s.refreshTokenPublicKey = rtpuk
 
 	return s
 }
 
 // GenerateAccessToken generates a new access token
 func (t *TokenService) GenerateAccessToken(ctx context.Context, user *model.User) (string, error) {
-	sub := user.GetUserIDString()
+	sub := user.GetIdString()
 
 	if sub == "" {
 		return "", errors.New("user id is empty")
@@ -90,9 +104,9 @@ func (t *TokenService) GenerateAccessToken(ctx context.Context, user *model.User
 	claims := Claims{
 		Role: user.GetRole(),
 		StandardClaims: jwt.StandardClaims{
-			Issuer:    t.config.Auth.Issuer,
+			Issuer:    t.config.Jwt.Issuer,
 			IssuedAt:  now.Unix(),
-			ExpiresAt: now.Add(time.Duration(t.config.Auth.AccessTokenExp) * time.Second).Unix(),
+			ExpiresAt: now.Add(time.Duration(t.config.Jwt.AccessTokenExp) * time.Second).Unix(),
 			Subject:   sub,
 		},
 	}
@@ -103,7 +117,7 @@ func (t *TokenService) GenerateAccessToken(ctx context.Context, user *model.User
 
 // GenerateRefreshToken generates a new refresh token
 func (t *TokenService) GenerateRefreshToken(ctx context.Context, user *model.User) (string, error) {
-	sub := user.GetUserIDString()
+	sub := user.GetIdString()
 
 	if sub == "" {
 		return "", errors.New("user id is empty")
@@ -111,45 +125,20 @@ func (t *TokenService) GenerateRefreshToken(ctx context.Context, user *model.Use
 
 	now := time.Now().UTC()
 
-	claims := Claims{
-		Role: user.GetRole(),
-		StandardClaims: jwt.StandardClaims{
-			Issuer:    t.config.Auth.Issuer,
-			IssuedAt:  now.Unix(),
-			ExpiresAt: now.Add(time.Duration(t.config.Auth.RefreshTokenExp) * time.Second).Unix(),
-			Subject:   sub,
-		},
+	claims := jwt.StandardClaims{
+		Issuer:    t.config.Jwt.Issuer,
+		IssuedAt:  now.Unix(),
+		ExpiresAt: now.Add(time.Duration(t.config.Jwt.RefreshTokenExp) * time.Second).Unix(),
+		Subject:   sub,
+		Id:        "custom-id",
 	}
 
-	token, err := jwt.NewWithClaims(jwt.SigningMethodRS256, claims).SignedString(t.accessTokenPrivateKey)
+	token, err := jwt.NewWithClaims(jwt.SigningMethodRS256, claims).SignedString(t.accessTokenPrivateKey) // TODO: use refresh token private key
 	return token, err
 }
 
-// ValidateAccessToken validates an access token
-func (t *TokenService) ValidateAccessToken(ctx context.Context, token string) error {
-	claims, err := t.parseToken(ctx, token)
-	if err != nil {
-		return err
-	}
-
-	if !claims.VerifyIssuer(t.config.Auth.Issuer, true) {
-		return errors.New("invalid issuer")
-	}
-
-	if !claims.VerifyExpiresAt(time.Now().UTC().Unix(), true) {
-		return errors.New("token expired")
-	}
-
-	return nil
-}
-
-// ValidateRefreshToken validates a refresh token
-func (t *TokenService) ValidateRefreshToken(ctx context.Context, token string) error {
-	panic("not implemented") // TODO: Implement
-}
-
 // ExtractToken extracts token from http request
-func (t *TokenService) ExtractFromRequest(ctx context.Context, r *http.Request) (map[string]interface{}, error) {
+func (t *TokenService) ValidateAccessTokenFromRequest(ctx context.Context, r *http.Request) (app.Claims, error) {
 	token := r.Header.Get("Authorization")
 	if token == "" {
 		return nil, errors.New("token is empty")
@@ -163,14 +152,11 @@ func (t *TokenService) ExtractFromRequest(ctx context.Context, r *http.Request) 
 		return nil, err
 	}
 
-	return map[string]interface{}{
-		"user_id": claims.Subject,
-		"role":    claims.Role,
-	}, nil
+	return claims, nil
 }
 
 // parseToken parses a token
-func (t *TokenService) parseToken(ctx context.Context, token string) (*Claims, error) {
+func (t *TokenService) parseToken(ctx context.Context, token string) (app.Claims, error) {
 	claims := &Claims{}
 
 	tkn, err := jwt.ParseWithClaims(token, claims, t.provideAccessTokenPublicKey)
@@ -185,6 +171,10 @@ func (t *TokenService) parseToken(ctx context.Context, token string) (*Claims, e
 
 	if !tkn.Valid {
 		return nil, errors.New("token is invalid")
+	}
+
+	if !claims.VerifyIssuer(t.config.Jwt.Issuer, true) {
+		return nil, errors.New("invalid issuer")
 	}
 
 	return claims, nil
