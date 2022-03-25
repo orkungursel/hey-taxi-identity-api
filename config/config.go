@@ -2,8 +2,6 @@ package config
 
 import (
 	"os"
-
-	"github.com/spf13/viper"
 )
 
 func NewConfig() *Config {
@@ -13,8 +11,6 @@ func NewConfig() *Config {
 func NewConfigWithFile(file string) *Config {
 	cm := NewManager()
 	cm.file = file
-	cm.v = viper.New()
-	cm.c = defaults()
 
 	if err := cm.load(); err != nil {
 		panic(err)

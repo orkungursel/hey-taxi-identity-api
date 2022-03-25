@@ -15,7 +15,12 @@ type ConfigManager struct {
 }
 
 func NewManager() *ConfigManager {
-	return &ConfigManager{}
+	m := &ConfigManager{
+		c: defaults(),
+		v: viper.New(),
+	}
+
+	return m
 }
 
 // load reads in config file and ENV variables if set.
