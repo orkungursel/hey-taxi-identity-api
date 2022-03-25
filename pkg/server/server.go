@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -10,11 +11,16 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/orkungursel/hey-taxi-identity-api/config"
+	userServiceGrpc "github.com/orkungursel/hey-taxi-identity-api/internal/api/grpc"
 	"github.com/orkungursel/hey-taxi-identity-api/pkg/logger"
+	userService "github.com/orkungursel/hey-taxi-identity-api/proto"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/keepalive"
 )
 
 type Server struct {
 	echo   *echo.Echo
+	gs     *grpc.Server
 	config *config.Config
 	logger logger.ILogger
 	ctx    context.Context
@@ -40,7 +46,9 @@ func (s *Server) Run() error {
 	s.configure()
 	s.mapHandlers()
 
-	go s.start(ctx, cancel)
+	go s.startHttpServer(ctx, cancel)
+	go s.startGRPCServer(ctx, cancel)
+
 	go s.waitForCancellationToken(ctx)
 
 	<-s.done
@@ -50,13 +58,11 @@ func (s *Server) Run() error {
 	ctx, sdCancel := context.WithTimeout(ctx, time.Duration(s.config.Server.ShutdownTimeout)*time.Second)
 	defer sdCancel()
 
-	if err := s.shutdown(ctx); err != nil {
+	if err := s.shutdownHttpServer(ctx); err != nil {
 		s.logger.Errorf("Error while shutting down server: %s", err)
-		return err
 	}
 
 	<-ctx.Done()
-
 	s.logger.Info("Server Exited Properly")
 
 	return nil
@@ -66,8 +72,8 @@ func (s *Server) Logger() logger.ILogger {
 	return s.logger
 }
 
-// start starts the server
-func (s *Server) start(ctx context.Context, cancel context.CancelFunc) {
+// startHttpServer starts the server
+func (s *Server) startHttpServer(ctx context.Context, cancel context.CancelFunc) {
 	// create http server
 	httpServer := &http.Server{
 		Addr: s.config.Server.Host + ":" + s.config.Server.Port,
@@ -83,9 +89,43 @@ func (s *Server) start(ctx context.Context, cancel context.CancelFunc) {
 	}
 }
 
-// shutdown stops the server
-func (s *Server) shutdown(ctx context.Context) error {
+// shutdownHttpServer stops the server
+func (s *Server) shutdownHttpServer(ctx context.Context) error {
 	return s.echo.Shutdown(ctx)
+}
+
+// startGRPCServer starts the gRPC server
+func (s *Server) startGRPCServer(ctx context.Context, cancel context.CancelFunc) {
+	s.gs = grpc.NewServer(grpc.KeepaliveParams(keepalive.ServerParameters{
+		Time:                  time.Duration(s.config.Server.Grpc.Time) * time.Hour,
+		Timeout:               time.Duration(s.config.Server.Grpc.Timeout) * time.Second,
+		MaxConnectionIdle:     time.Duration(s.config.Server.Grpc.MaxConnectionIdle) * time.Second,
+		MaxConnectionAge:      time.Duration(s.config.Server.Grpc.MaxConnectionAge) * time.Second,
+		MaxConnectionAgeGrace: time.Duration(s.config.Server.Grpc.MaxConnectionAgeGrace) * time.Second,
+	}))
+
+	userService.RegisterUserServiceServer(s.gs, userServiceGrpc.NewUserServiceGrpc(s.logger))
+
+	l, err := net.Listen("tcp", s.config.Server.Host+":"+s.config.Server.Grpc.Port)
+	defer l.Close()
+
+	if err != nil {
+		s.logger.Error(err)
+		cancel()
+		return
+	}
+
+	s.logger.Infof("Starting gRPC server on %s", l.Addr())
+
+	if err := s.gs.Serve(l); err != nil {
+		s.logger.Error(err)
+		cancel()
+		return
+	}
+}
+
+func (s *Server) shutdownGrpcServer(ctx context.Context) {
+	s.gs.GracefulStop()
 }
 
 // waitForCancellationToken waits for the cancellation token
