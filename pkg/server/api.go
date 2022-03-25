@@ -18,7 +18,7 @@ type ApiHandlerItem struct {
 	isRoot  bool
 }
 
-func (s *Server) addApiRoute(prefix string, h ApiHandler, isRoot bool) error {
+func (s *Server) addRoute(prefix string, h ApiHandler, isRoot bool) error {
 	for _, ahi := range s.apis {
 		if ahi.isRoot == isRoot && ahi.prefix == prefix {
 			return errors.Errorf(ErrApiAlreadyExists.Error(), prefix)
@@ -34,10 +34,10 @@ func (s *Server) addApiRoute(prefix string, h ApiHandler, isRoot bool) error {
 	return nil
 }
 
-func (s *Server) AddApi(prefix string, h ApiHandler) error {
-	return s.addApiRoute(prefix, h, false)
+func (s *Server) RegisterHttpApi(prefix string, h ApiHandler) error {
+	return s.addRoute(prefix, h, false)
 }
 
-func (s *Server) AddApiToRoot(prefix string, h ApiHandler) error {
-	return s.addApiRoute(prefix, h, true)
+func (s *Server) RegisterHttpApiAsRoot(prefix string, h ApiHandler) error {
+	return s.addRoute(prefix, h, true)
 }

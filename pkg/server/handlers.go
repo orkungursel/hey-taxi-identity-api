@@ -16,4 +16,8 @@ func (s *Server) mapHandlers() {
 			api.handler.RegisterRoutes(root.Group(api.prefix))
 		}
 	}
+
+	for _, route := range s.echo.Routes() {
+		s.logger.Debugf("route: %v %s -> %v", route.Method, route.Path, route.Name)
+	}
 }

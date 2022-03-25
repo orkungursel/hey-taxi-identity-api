@@ -19,7 +19,7 @@ func Api(s *server.Server) *SwaggerApi {
 		Server: s,
 	}
 
-	if err := s.AddApiToRoot("/swagger/*", api); err != nil {
+	if err := s.RegisterHttpApi("/swagger/*", api); err != nil {
 		panic(err)
 	}
 
