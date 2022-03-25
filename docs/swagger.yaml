@@ -1,4 +1,63 @@
 basePath: /api/v1
+definitions:
+  LoginRequest:
+    properties:
+      email:
+        maxLength: 100
+        type: string
+      password:
+        maxLength: 60
+        minLength: 6
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  RegisterResponse:
+    properties:
+      email:
+        maxLength: 100
+        type: string
+      password:
+        maxLength: 60
+        minLength: 6
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  SuccessAuthResponse:
+    properties:
+      access_token:
+        type: string
+      access_token_expires_in:
+        type: integer
+      refresh_token:
+        type: string
+      refresh_token_expires_in:
+        type: integer
+      user:
+        $ref: '#/definitions/UserResponse'
+    type: object
+  UserResponse:
+    properties:
+      avatar:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: string
+      last_name:
+        type: string
+      role:
+        type: string
+    type: object
+  echo.HTTPError:
+    properties:
+      message: {}
+    type: object
 info:
   contact:
     name: Orkun Gürsel
@@ -8,5 +67,101 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   title: Hey Taxi Identity API
   version: "1.0"
-paths: {}
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: User Login
+      parameters:
+      - description: Payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/SuccessAuthResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Login
+      tags:
+      - Auth
+  /auth/me:
+    get:
+      consumes:
+      - application/json
+      description: Fetch the details of logged-in user by access token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/UserResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      security:
+      - BearerAuth: []
+      summary: User Details
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: User Registration
+      parameters:
+      - description: Payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/RegisterResponse'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/SuccessAuthResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Register
+      tags:
+      - Auth
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
