@@ -10,7 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-func Connect(ctx context.Context, config *config.Config) (*mongo.Client, error) {
+func New(ctx context.Context, config *config.Config) (*mongo.Client, error) {
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(config.Mongo.ConnectionTimeout)*time.Second)
 	defer cancel()
 
