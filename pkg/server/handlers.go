@@ -18,6 +18,6 @@ func (s *Server) mapHandlers() {
 	}
 
 	for _, route := range s.echo.Routes() {
-		s.logger.Debugf("route: %v %s -> %v", route.Method, route.Path, route.Name)
+		s.logger.Debugf("route: %s [%s]", route.Path, route.Method)
 	}
 }
