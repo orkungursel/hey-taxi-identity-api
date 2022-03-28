@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
+	"github.com/orkungursel/hey-taxi-identity-api/config"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -46,12 +47,24 @@ type appLogger struct {
 }
 
 // New App Logger constructor
-func New(config *Config) *appLogger {
+func New(c *config.Config) *appLogger {
+	loggerConfig := &Config{
+		AppName:  c.App.Name,
+		LogLevel: "debug",
+		Encoder:  "console",
+		DevMode:  true,
+	}
+	if c.IsProduction() {
+		loggerConfig.LogLevel = "info"
+		loggerConfig.Encoder = "json"
+		loggerConfig.DevMode = false
+	}
+
 	return (&appLogger{
-		appname:  config.AppName,
-		level:    config.LogLevel,
-		devMode:  config.DevMode,
-		encoding: config.Encoder,
+		appname:  loggerConfig.AppName,
+		level:    loggerConfig.LogLevel,
+		devMode:  loggerConfig.DevMode,
+		encoding: loggerConfig.Encoder,
 	}).init()
 }
 
@@ -242,6 +255,6 @@ func (l *appLogger) EchoCtx(c echo.Context, start time.Time) {
 	case n >= 300:
 		l.logger.Info("Redirecting", fields...)
 	default:
-		l.logger.Info("Success", fields...)
+		//l.logger.Info("Success", fields...)
 	}
 }
