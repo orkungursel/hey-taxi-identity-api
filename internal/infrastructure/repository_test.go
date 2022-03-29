@@ -217,3 +217,43 @@ func TestRepository_DeleteUser(t *testing.T) {
 		})
 	}
 }
+
+func TestRepository_GetUsersByIds(t *testing.T) {
+	type fields struct {
+		Repository app.Repository
+		config     *config.Config
+		logger     logger.ILogger
+		db         *mongo.Collection
+	}
+	type args struct {
+		ctx context.Context
+		ids []string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    []*model.User
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := &Repository{
+				Repository: tt.fields.Repository,
+				config:     tt.fields.config,
+				logger:     tt.fields.logger,
+				db:         tt.fields.db,
+			}
+			got, err := r.GetUsersByIds(tt.args.ctx, tt.args.ids)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Repository.GetUsersByIds() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Repository.GetUsersByIds() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
