@@ -21,7 +21,7 @@ protoc-gen-user-details:
 	user_details.proto
 
 swagger: swagger-fmt
-	swag init -g ./pkg/server/swagger/doc.go -pd --parseDepth 2
+	swag init -g ./pkg/swagger/doc.go -pd --parseDepth 2
 
 swagger-fmt:
-	swag fmt -g ./pkg/server/swagger/doc.go
+	swag fmt -g ./pkg/swagger/doc.go
