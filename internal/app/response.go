@@ -2,6 +2,12 @@ package app
 
 import "github.com/orkungursel/hey-taxi-identity-api/internal/domain/model"
 
+type HTTPError struct {
+	Code     int         `json:"-"`
+	Message  interface{} `json:"message"`
+	Internal error       `json:"-"` // Stores the error returned by an external dependency
+} // name: "HTTPError"
+
 // SuccessAuthResponse is the response of LoginRequest
 type SuccessAuthResponse struct {
 	UserDto               UserResponse `json:"user"`
