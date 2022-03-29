@@ -1,5 +1,25 @@
 version: "3.5"
 services:
+  identity-api:
+    container_name: identity-api
+    image: ghcr.io/orkungursel/hey-taxi-identity-api:latest
+    ports:
+      - "8080:8080"
+      - "50051:50051"
+    environment:
+      - MONGO_URI=mongodb://root:root@mongo:27017
+    volumes:
+      - "./certs/private.pem:/etc/certs/access-token-private-key.pem:ro"
+      - "./certs/public.pem:/etc/certs/access-token-public-key.pem:ro"
+      - "./certs/private.pem:/etc/certs/refresh-token-private-key.pem:ro"
+      - "./certs/public.pem:/etc/certs/refresh-token-public-key.pem:ro"
+    networks:
+      - hey-taxi-network
+    depends_on:
+      - mongo
+    profiles:
+      - testing
+
   mongo:
     container_name: mongo
     image: mongo
