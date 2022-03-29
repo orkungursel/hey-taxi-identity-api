@@ -8,10 +8,12 @@ import (
 func TestOverrideEnvironments_WhenEnvFileExists(t *testing.T) {
 	wantAppName := "Foobar"
 	wantRedisAddr := "localhost2:6379"
+	wantServerHttpHost := "localhost"
 	wantAccessTokenPath := "/foo/bar/access_token.pem"
 
 	t.Setenv("APP_NAME", wantAppName)
 	t.Setenv("REDIS_ADDR", wantRedisAddr)
+	t.Setenv("SERVER_HTTP_HOST", wantServerHttpHost)
 	t.Setenv("JWT_ACCESS_TOKEN_PRIVATE_KEY_FILE", wantAccessTokenPath)
 
 	c := NewConfigWithFile("")
@@ -28,6 +30,12 @@ func TestOverrideEnvironments_WhenEnvFileExists(t *testing.T) {
 		}
 	})
 
+	t.Run("override server_http_host", func(t *testing.T) {
+		if c.Server.Http.Host != wantServerHttpHost {
+			t.Errorf("c.Server.Http.Host = %v, want %v", c.Server.Http.Host, wantServerHttpHost)
+		}
+	})
+
 	t.Run("override jwt", func(t *testing.T) {
 		if c.Jwt.AccessTokenPrivateKeyFile != wantAccessTokenPath {
 			t.Errorf("c.Redis.Addr = %v, want %v", c.Jwt.AccessTokenPrivateKeyFile, wantAccessTokenPath)
@@ -38,10 +46,12 @@ func TestOverrideEnvironments_WhenEnvFileExists(t *testing.T) {
 func TestOverrideEnvironments_WhenEnvFileNotExists(t *testing.T) {
 	wantAppName := "Foobar"
 	wantRedisAddr := "http://foo.bar"
+	wantServerHttpHost := "localhost"
 	wantAccessTokenPath := "/foo/bar/access_token.pem"
 
 	t.Setenv("APP_NAME", wantAppName)
 	t.Setenv("REDIS_ADDR", wantRedisAddr)
+	t.Setenv("SERVER_HTTP_HOST", wantServerHttpHost)
 	t.Setenv("JWT_ACCESS_TOKEN_PRIVATE_KEY_FILE", wantAccessTokenPath)
 
 	c := NewConfigWithFile("-")
@@ -55,6 +65,12 @@ func TestOverrideEnvironments_WhenEnvFileNotExists(t *testing.T) {
 	t.Run("override redis_addr", func(t *testing.T) {
 		if c.Redis.Addr != wantRedisAddr {
 			t.Errorf("c.Redis.Addr = %v, want %v", c.Redis.Addr, wantRedisAddr)
+		}
+	})
+
+	t.Run("override server_http_host", func(t *testing.T) {
+		if c.Server.Http.Host != wantServerHttpHost {
+			t.Errorf("c.Server.Http.Host = %v, want %v", c.Server.Http.Host, wantServerHttpHost)
 		}
 	})
 
