@@ -20,8 +20,11 @@ func (s *Server) configure() {
 	s.echo.Use(emw.Recover())
 	s.echo.Use(middleware.CORS(s.config))
 	s.echo.Use(emw.Secure())
+	s.echo.Use(emw.BodyLimit(s.config.Server.Http.BodyLimit))
+	s.echo.Use(emw.Gzip())
+	s.echo.Use(emw.RequestID())
 	s.echo.Use(emw.TimeoutWithConfig(emw.TimeoutConfig{
-		Timeout:      time.Duration(s.config.Server.RequestTimeout) * time.Second,
+		Timeout:      time.Duration(s.config.Server.Http.RequestTimeout) * time.Second,
 		ErrorMessage: "{\"error\":\"request timeout\"}",
 	}))
 }
