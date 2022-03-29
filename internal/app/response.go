@@ -6,7 +6,7 @@ type HTTPError struct {
 	Code     int         `json:"-"`
 	Message  interface{} `json:"message"`
 	Internal error       `json:"-"` // Stores the error returned by an external dependency
-} // name: "HTTPError"
+} // @name HTTPError
 
 // SuccessAuthResponse is the response of LoginRequest
 type SuccessAuthResponse struct {
