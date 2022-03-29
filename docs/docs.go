@@ -60,13 +60,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
+                            "$ref": "#/definitions/app.HTTPError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
+                            "$ref": "#/definitions/app.HTTPError"
                         }
                     }
                 }
@@ -103,13 +103,67 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
+                            "$ref": "#/definitions/app.HTTPError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
+                            "$ref": "#/definitions/app.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/refresh-token": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Fetch the details of logged-in user by access token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Refreshes all tokens",
+                "parameters": [
+                    {
+                        "description": "Payload",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/RefreshTokenRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/UserResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/app.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.HTTPError"
                         }
                     }
                 }
@@ -152,13 +206,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
+                            "$ref": "#/definitions/app.HTTPError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
+                            "$ref": "#/definitions/app.HTTPError"
                         }
                     }
                 }
@@ -181,6 +235,17 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 60,
                     "minLength": 6
+                }
+            }
+        },
+        "RefreshTokenRequest": {
+            "type": "object",
+            "required": [
+                "token"
+            ],
+            "properties": {
+                "token": {
+                    "type": "string"
                 }
             }
         },
@@ -245,7 +310,7 @@ const docTemplate = `{
                 }
             }
         },
-        "echo.HTTPError": {
+        "app.HTTPError": {
             "type": "object",
             "properties": {
                 "message": {}

@@ -13,6 +13,13 @@ definitions:
     - email
     - password
     type: object
+  RefreshTokenRequest:
+    properties:
+      token:
+        type: string
+    required:
+    - token
+    type: object
   RegisterResponse:
     properties:
       email:
@@ -54,7 +61,7 @@ definitions:
       role:
         type: string
     type: object
-  echo.HTTPError:
+  app.HTTPError:
     properties:
       message: {}
     type: object
@@ -92,11 +99,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/echo.HTTPError'
+            $ref: '#/definitions/app.HTTPError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/echo.HTTPError'
+            $ref: '#/definitions/app.HTTPError'
       summary: Login
       tags:
       - Auth
@@ -117,14 +124,48 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/echo.HTTPError'
+            $ref: '#/definitions/app.HTTPError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/echo.HTTPError'
+            $ref: '#/definitions/app.HTTPError'
       security:
       - BearerAuth: []
       summary: User Details
+      tags:
+      - Auth
+  /auth/refresh-token:
+    get:
+      consumes:
+      - application/json
+      description: Fetch the details of logged-in user by access token
+      parameters:
+      - description: Payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/RefreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/UserResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/app.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.HTTPError'
+      security:
+      - BearerAuth: []
+      summary: Refreshes all tokens
       tags:
       - Auth
   /auth/register:
@@ -151,11 +192,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/echo.HTTPError'
+            $ref: '#/definitions/app.HTTPError'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/echo.HTTPError'
+            $ref: '#/definitions/app.HTTPError'
       summary: Register
       tags:
       - Auth
