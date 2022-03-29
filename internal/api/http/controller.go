@@ -57,8 +57,6 @@ func (a *Controller) login() echo.HandlerFunc {
 			return err
 		}
 
-		println(c.Request().Header.Get(echo.HeaderXRequestID))
-
 		res, err := a.authService.Login(c.Request().Context(), payload)
 		if err != nil {
 			return err
