@@ -5,7 +5,7 @@ import (
 	"context"
 	"testing"
 
-	. "github.com/orkungursel/hey-taxi-identity-api/mock"
+	. "github.com/orkungursel/hey-taxi-identity-api/pkg/logger/mock"
 )
 
 func TestPasswordService_HashAndCompare(t *testing.T) {
