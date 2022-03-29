@@ -13,8 +13,7 @@ func (s *Server) startHttpServer(ctx context.Context, cancel context.CancelFunc)
 
 	// create http server
 	httpServer := &http.Server{
-		Addr:           s.config.Server.Host + ":" + s.config.Server.Port,
-		MaxHeaderBytes: 1 << 20, // 1MB
+		Addr: s.config.Server.Http.Host + ":" + s.config.Server.Http.Port,
 	}
 
 	s.logger.Infof("starting server on %s", httpServer.Addr)
@@ -30,7 +29,7 @@ func (s *Server) startHttpServer(ctx context.Context, cancel context.CancelFunc)
 // shutdownHttpServer stops the server
 func (s *Server) shutdownHttpServer(ctx context.Context) error {
 	s.logger.Info("stopping server...")
-	ctx, cancel := context.WithTimeout(ctx, time.Duration(s.config.Server.ShutdownTimeout)*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(s.config.Server.Http.ShutdownTimeout)*time.Second)
 	defer cancel()
 
 	if err := s.echo.Shutdown(ctx); err != nil {

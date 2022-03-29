@@ -21,7 +21,7 @@ func (s *Server) startGRPCServer(ctx context.Context, cancel context.CancelFunc)
 
 	s.mapServices()
 
-	l, err := net.Listen("tcp", s.config.Server.Host+":"+s.config.Server.Grpc.Port)
+	l, err := net.Listen("tcp", s.config.Server.Grpc.Host+":"+s.config.Server.Grpc.Port)
 	defer l.Close()
 
 	if err != nil {
