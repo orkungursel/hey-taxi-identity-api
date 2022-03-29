@@ -10,10 +10,7 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "contact": {
-            "name": "Orkun Gürsel",
-            "url": "https://github.com/orkungursel"
-        },
+        "contact": {},
         "license": {
             "name": "Apache 2.0",
             "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
@@ -60,13 +57,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/app.HTTPError"
+                            "$ref": "#/definitions/HTTPError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/app.HTTPError"
+                            "$ref": "#/definitions/HTTPError"
                         }
                     }
                 }
@@ -103,20 +100,26 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/app.HTTPError"
+                            "$ref": "#/definitions/HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/app.HTTPError"
+                            "$ref": "#/definitions/HTTPError"
                         }
                     }
                 }
             }
         },
         "/auth/refresh-token": {
-            "get": {
+            "post": {
                 "security": [
                     {
                         "BearerAuth": []
@@ -157,13 +160,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/app.HTTPError"
+                            "$ref": "#/definitions/HTTPError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/app.HTTPError"
+                            "$ref": "#/definitions/HTTPError"
                         }
                     }
                 }
@@ -206,13 +209,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/app.HTTPError"
+                            "$ref": "#/definitions/HTTPError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/app.HTTPError"
+                            "$ref": "#/definitions/HTTPError"
                         }
                     }
                 }
@@ -220,6 +223,12 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "HTTPError": {
+            "type": "object",
+            "properties": {
+                "message": {}
+            }
+        },
         "LoginRequest": {
             "type": "object",
             "required": [
@@ -308,12 +317,6 @@ const docTemplate = `{
                 "role": {
                     "type": "string"
                 }
-            }
-        },
-        "app.HTTPError": {
-            "type": "object",
-            "properties": {
-                "message": {}
             }
         }
     },
