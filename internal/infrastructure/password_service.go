@@ -1,4 +1,3 @@
-//go:generate mockgen -source password_service.go -destination mock/password_service_mock.go -package mock
 package infrastructure
 
 import (
@@ -9,11 +8,6 @@ import (
 	"github.com/orkungursel/hey-taxi-identity-api/pkg/logger"
 	"golang.org/x/crypto/bcrypt"
 )
-
-type IPasswordService interface {
-	Hash(ctx context.Context, password string) (string, error)
-	Compare(ctx context.Context, hashedPassword string, password string) error
-}
 
 type PasswordService struct {
 	logger logger.ILogger
@@ -48,6 +42,7 @@ func (s *PasswordService) Compare(ctx context.Context, hashedPassword string, pa
 	if err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(sanitizedPassword)); err != nil {
 		return err
 	}
+
 	return nil
 }
 
