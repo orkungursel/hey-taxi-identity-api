@@ -14,7 +14,13 @@ func New(ctx context.Context, config *config.Config) (*mongo.Client, error) {
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(config.Mongo.ConnectionTimeout)*time.Second)
 	defer cancel()
 
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(config.Mongo.Uri))
+	socketTimeout := time.Duration(config.Mongo.SocketTimeout) * time.Second
+
+	opts := options.Client()
+	opts.ApplyURI(config.Mongo.Uri)
+	opts.SocketTimeout = &socketTimeout
+
+	client, err := mongo.Connect(ctx, opts)
 	if err != nil {
 		return nil, err
 	}

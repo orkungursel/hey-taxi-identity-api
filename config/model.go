@@ -18,6 +18,7 @@ type (
 	Server struct {
 		Host            string `mapstructure:"server_host"`
 		Port            string `mapstructure:"server_port" default:"8080"`
+		RequestTimeout  int    `mapstructure:"server_request_timeout"`
 		ShutdownTimeout int    `mapstructure:"server_shutdown_timeout"`
 		Grpc            Grpc   `mapstructure:"-"`
 	}
@@ -46,6 +47,7 @@ type (
 	Mongo struct {
 		Uri               string `mapstructure:"mongo_uri"`
 		ConnectionTimeout int    `mapstructure:"mongo_connection_timeout"`
+		SocketTimeout     int    `mapstructure:"mongo_socket_timeout"`
 	}
 
 	Auth struct {

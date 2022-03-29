@@ -4,6 +4,7 @@ package config
 func defaults() *Config {
 	return &Config{
 		App: App{Name: "HeyTaxi Identity API"},
+		Mongo: Mongo{Uri: "mongodb://root:root@localhost:27017", ConnectionTimeout: 3, SocketTimeout: 3},
 		Server: Server{
 			Host: "", Port: "8080", ShutdownTimeout: 5,
 			Grpc: Grpc{Port: "50051", MaxConnectionIdle: 10, Timeout: 10, MaxConnectionAge: 10, MaxConnectionAgeGrace: 10, Time: 20},
