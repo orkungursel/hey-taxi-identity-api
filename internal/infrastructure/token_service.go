@@ -111,8 +111,7 @@ func (t *TokenService) GenerateAccessToken(ctx context.Context, user *model.User
 		},
 	}
 
-	token, err := jwt.NewWithClaims(jwt.SigningMethodRS256, claims).SignedString(t.accessTokenPrivateKey)
-	return token, err
+	return jwt.NewWithClaims(jwt.SigningMethodRS256, claims).SignedString(t.accessTokenPrivateKey)
 }
 
 // GenerateRefreshToken generates a new refresh token
@@ -133,8 +132,7 @@ func (t *TokenService) GenerateRefreshToken(ctx context.Context, user *model.Use
 		Id:        "custom-id",
 	}
 
-	token, err := jwt.NewWithClaims(jwt.SigningMethodRS256, claims).SignedString(t.accessTokenPrivateKey) // TODO: use refresh token private key
-	return token, err
+	return jwt.NewWithClaims(jwt.SigningMethodRS256, claims).SignedString(t.accessTokenPrivateKey) // TODO: use refresh token private key
 }
 
 // ExtractToken extracts token from http request
@@ -147,7 +145,7 @@ func (t *TokenService) ValidateAccessTokenFromRequest(ctx context.Context, r *ht
 	// remove bearer prefix
 	token = token[7:]
 
-	claims, err := t.parseToken(ctx, token)
+	claims, err := t.ParseToken(ctx, token)
 	if err != nil {
 		return nil, err
 	}
@@ -155,8 +153,39 @@ func (t *TokenService) ValidateAccessTokenFromRequest(ctx context.Context, r *ht
 	return claims, nil
 }
 
-// parseToken parses a token
-func (t *TokenService) parseToken(ctx context.Context, token string) (app.Claims, error) {
+func (t *TokenService) ValidateRefreshToken(ctx context.Context, token string) (string, error) {
+	c, err := jwt.Parse(token, t.provideRefreshTokenPublicKey)
+	if err != nil {
+		return "", err
+	}
+
+	claims, ok := c.Claims.(jwt.MapClaims)
+	if !ok {
+		return "", errors.New("claims is not jwt.MapClaims")
+	}
+
+	if !c.Valid {
+		return "", errors.New("token is not valid")
+	}
+
+	if !claims.VerifyIssuer(t.config.Jwt.Issuer, true) {
+		return "", errors.New("token issuer is not valid")
+	}
+
+	if !claims.VerifyExpiresAt(time.Now().Unix(), true) {
+		return "", errors.New("token expired")
+	}
+
+	sub := claims["sub"].(string)
+	if sub == "" {
+		return "", errors.New("sub is empty")
+	}
+
+	return sub, nil
+}
+
+// ParseToken parses a token
+func (t *TokenService) ParseToken(ctx context.Context, token string) (app.Claims, error) {
 	claims := &Claims{}
 
 	tkn, err := jwt.ParseWithClaims(token, claims, t.provideAccessTokenPublicKey)
@@ -181,6 +210,11 @@ func (t *TokenService) parseToken(ctx context.Context, token string) (app.Claims
 }
 
 // provideAccessTokenPublicKey provides access token public key to veriy token
-func (t *TokenService) provideAccessTokenPublicKey(token *jwt.Token) (interface{}, error) {
+func (t *TokenService) provideAccessTokenPublicKey(_ *jwt.Token) (interface{}, error) {
 	return t.accessTokenPublicKey, nil
+}
+
+// provideRefreshTokenPublicKey provides access token public key to veriy token
+func (t *TokenService) provideRefreshTokenPublicKey(_ *jwt.Token) (interface{}, error) {
+	return t.refreshTokenPublicKey, nil
 }
