@@ -16,14 +16,19 @@ type (
 	}
 
 	Server struct {
-		Host            string `mapstructure:"server_host"`
-		Port            string `mapstructure:"server_port" default:"8080"`
-		RequestTimeout  int    `mapstructure:"server_request_timeout"`
-		ShutdownTimeout int    `mapstructure:"server_shutdown_timeout"`
-		Grpc            Grpc   `mapstructure:"-"`
+		Http ServerHttp `mapstructure:",squash"`
+		Grpc ServerGrpc `mapstructure:",squash"`
 	}
 
-	Grpc struct {
+	ServerHttp struct {
+		Host            string `mapstructure:"server_http_host"`
+		Port            string `mapstructure:"server_http_port" default:"8080"`
+		BodyLimit       string `mapstructure:"server_http_body_limit"`
+		RequestTimeout  int    `mapstructure:"server_http_request_timeout"`
+		ShutdownTimeout int    `mapstructure:"server_http_shutdown_timeout"`
+	}
+
+	ServerGrpc struct {
 		Host                  string `mapstructure:"server_grpc_host"`
 		Port                  string `mapstructure:"server_grpc_port" default:"50051"`
 		MaxConnectionIdle     int    `mapstructure:"server_grpc_max_connection_idle"`
