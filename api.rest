@@ -9,8 +9,8 @@ POST {{url}}/auth/login
 Content-Type: {{contentType}}
 
 {
-  "email": "orquncom4@gmail.com",
-  "password": "strsaadsa"
+  "email": "foo@bar.com",
+  "password": "password"
 }
 
 ### Me
@@ -18,11 +18,18 @@ GET {{url}}/auth/me
 Content-Type: {{contentType}}
 Authorization: Bearer {{token}}
 
+### Refresh Token
+POST {{url}}/auth/refresh-token
+Content-Type: {{contentType}}
+
+{
+  "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoidXNlciIsImV4cCI6MTY0ODUyMDY4MywiaWF0IjoxNjQ4NTE3MDgzLCJpc3MiOiJoZXktdGF4aS1pZGVudGl0eS1hcGkiLCJzdWIiOiI2MjQxNzk2ZTg5M2ZkN2YxZWYzNzgwNzUifQ.lZ-ITh8iR76Toidq6Aawok4UcQeFl_YAy6kRWGmfPpx19Er69tHnDSUVfj_2SE4EOPIcyvf534xxVqMGL1cgdY1lKNz_CL63WeBdSL27eSd4bGlzQlI9Nvt20P-HKvYYbdF683u3g8AXQQbBDhLa3BIgZlXmbHIKPQ4Et04CxThBMEK-QfUTAZKg-6CL5NK9wBGMOy61VAMSI3XYmvRztGyMqoEmZ0TmVNYdtehmOmrSCs4BCQC-2LiJ0HDPIjmC46x-eBBXja6A74Wx5-fcHPAIvs62PLC1oYBYJ0IgtkOn6y6drYCzydmPQ5gbjb80qjK5B-XOTU20qgiEiGV4oA"
+}
 ### Register
 POST {{url}}/auth/register
 Content-Type: {{contentType}}
 
 {
-  "email": "orquncom4@gmail.com",
-  "password": "strsadsa"
+  "email": "foo@bar.com",
+  "password": "password"
 }
