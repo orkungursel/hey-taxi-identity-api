@@ -11,18 +11,18 @@ import (
 )
 
 type Controller struct {
-	config *config.Config
-	logger logger.ILogger
-	svc    app.AuthService
-	ts     app.TokenService
+	config       *config.Config
+	logger       logger.ILogger
+	authService  app.AuthService
+	tokenService app.TokenService
 }
 
 func NewController(config *config.Config, logger logger.ILogger, s app.AuthService, ts app.TokenService) *Controller {
 	return &Controller{
-		svc:    s,
-		ts:     ts,
-		logger: logger,
-		config: config,
+		authService:  s,
+		tokenService: ts,
+		logger:       logger,
+		config:       config,
 	}
 }
 
@@ -33,7 +33,7 @@ func (a *Controller) RegisterRoutes(e *echo.Group) {
 	e.POST("/login/", a.login())
 	e.POST("/register/", a.register())
 	e.POST("/refresh-token/", a.refreshToken())
-	e.GET("/me/", a.me(), middleware.Auth(a.ts))
+	e.GET("/me/", a.me(), middleware.Auth(a.tokenService))
 }
 
 // @Summary      Login
@@ -57,7 +57,9 @@ func (a *Controller) login() echo.HandlerFunc {
 			return err
 		}
 
-		res, err := a.svc.Login(c.Request().Context(), payload)
+		println(c.Request().Header.Get(echo.HeaderXRequestID))
+
+		res, err := a.authService.Login(c.Request().Context(), payload)
 		if err != nil {
 			return err
 		}
@@ -87,7 +89,7 @@ func (a *Controller) register() echo.HandlerFunc {
 			return err
 		}
 
-		res, err := a.svc.Register(c.Request().Context(), payload)
+		res, err := a.authService.Register(c.Request().Context(), payload)
 		if err != nil {
 			return err
 		}
@@ -105,7 +107,7 @@ func (a *Controller) register() echo.HandlerFunc {
 // @Success      200  {array}   app.UserResponse
 // @Failure      400      {object}  app.HTTPError
 // @Failure      500      {object}  app.HTTPError
-// @Router       /auth/refresh-token [get]
+// @Router       /auth/refresh-token [post]
 // @Security     BearerAuth
 func (a *Controller) refreshToken() echo.HandlerFunc {
 	return func(c echo.Context) error {
@@ -118,7 +120,7 @@ func (a *Controller) refreshToken() echo.HandlerFunc {
 			return err
 		}
 
-		res, err := a.svc.RefreshToken(c.Request().Context(), payload)
+		res, err := a.authService.RefreshToken(c.Request().Context(), payload)
 		if err != nil {
 			return err
 		}
@@ -134,6 +136,7 @@ func (a *Controller) refreshToken() echo.HandlerFunc {
 // @Produce      json
 // @Success      200      {array}   app.UserResponse
 // @Failure      400      {object}  app.HTTPError
+// @Failure      401      {object}  app.HTTPError
 // @Failure      500      {object}  app.HTTPError
 // @Router       /auth/me [get]
 // @Security     BearerAuth
@@ -144,7 +147,7 @@ func (a *Controller) me() echo.HandlerFunc {
 			return err
 		}
 
-		res, err := a.svc.Me(c.Request().Context(), userId)
+		res, err := a.authService.Me(c.Request().Context(), userId)
 		if err != nil {
 			return err
 		}
