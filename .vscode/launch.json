@@ -12,7 +12,7 @@
 			"program": "${workspaceFolder}/cmd/main.go",
 			"buildFlags": "-tags swagger",
 			"env": {
-				"SERVER_HOST": "localhost"
+				"SERVER_HTTP_HOST": "localhost"
 			}
 		}
 	]

@@ -1,4 +1,5 @@
-export SERVER_HOST=localhost
+export SERVER_HTTP_HOST=localhost
+export SERVER_GRPC_HOST=localhost
 
 run:
 	cd ./cmd/ && \
@@ -21,7 +22,13 @@ protoc-gen-user-details:
 	user_details.proto
 
 swagger: swagger-fmt
-	swag init -g ./pkg/swagger/doc.go -pd --parseDepth 2
+	swag init -g ./cmd/main.go -pd --parseDepth 2
 
 swagger-fmt:
-	swag fmt -g ./pkg/swagger/doc.go
+	swag fmt -g ./cmd/main.go
+
+docker-up:
+	docker-compose up -d
+
+docker-down:
+	docker-compose down
