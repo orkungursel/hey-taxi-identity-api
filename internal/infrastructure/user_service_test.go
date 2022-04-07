@@ -54,7 +54,7 @@ func TestUserService_UsersByIds(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	config := config.NewConfig()
+	config := config.New()
 	logger := NewLoggerMock()
 
 	repo := mock.NewMockRepository(ctrl)

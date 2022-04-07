@@ -59,7 +59,7 @@ func TestNewService(t *testing.T) {
 }
 
 func TestAuthService_Login(t *testing.T) {
-	config := config.NewConfig()
+	config := config.New()
 	logger := NewLoggerMock()
 
 	ctrl := gomock.NewController(t)
@@ -166,7 +166,7 @@ func TestAuthService_Register(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	config := config.NewConfig()
+	config := config.New()
 	logger := NewLoggerMock()
 
 	repo := mock.NewMockRepository(ctrl)
@@ -270,7 +270,7 @@ func TestAuthService_Me(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	config := config.NewConfig()
+	config := config.New()
 	logger := NewLoggerMock()
 
 	repo := mock.NewMockRepository(ctrl)

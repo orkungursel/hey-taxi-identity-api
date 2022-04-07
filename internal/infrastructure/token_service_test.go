@@ -42,7 +42,7 @@ func SetTokenServiceEnvForTesting(t *testing.T) {
 func TestNewTokenService(t *testing.T) {
 	SetTokenServiceEnvForTesting(t)
 
-	ts := NewTokenService(config.NewConfig(), NewLoggerMock())
+	ts := NewTokenService(config.New(), NewLoggerMock())
 
 	if ts.accessTokenPrivateKey == nil {
 		t.Errorf("access token privateKey is empty")
@@ -64,7 +64,7 @@ func TestNewTokenService(t *testing.T) {
 func TestTokenService_GenerateAccessToken(t *testing.T) {
 	SetTokenServiceEnvForTesting(t)
 
-	ts := NewTokenService(config.NewConfig(), NewLoggerMock())
+	ts := NewTokenService(config.New(), NewLoggerMock())
 
 	type args struct {
 		ctx  context.Context
@@ -113,7 +113,7 @@ func TestTokenService_GenerateAccessToken(t *testing.T) {
 func TestTokenService_GenerateRefreshToken(t *testing.T) {
 	SetTokenServiceEnvForTesting(t)
 
-	ts := NewTokenService(config.NewConfig(), NewLoggerMock())
+	ts := NewTokenService(config.New(), NewLoggerMock())
 
 	type args struct {
 		ctx  context.Context
@@ -144,7 +144,7 @@ func TestTokenService_GenerateRefreshToken(t *testing.T) {
 func TestTokenService_ValidateAccessTokenFromRequest(t *testing.T) {
 	SetTokenServiceEnvForTesting(t)
 
-	ts := NewTokenService(config.NewConfig(), NewLoggerMock())
+	ts := NewTokenService(config.New(), NewLoggerMock())
 
 	type args struct {
 		ctx context.Context
@@ -175,7 +175,7 @@ func TestTokenService_ValidateAccessTokenFromRequest(t *testing.T) {
 func TestTokenService_parseToken(t *testing.T) {
 	SetTokenServiceEnvForTesting(t)
 
-	ts := NewTokenService(config.NewConfig(), NewLoggerMock())
+	ts := NewTokenService(config.New(), NewLoggerMock())
 
 	u := &model.User{
 		Id: primitive.NewObjectID(),
@@ -305,7 +305,7 @@ func TestTokenService_parseToken(t *testing.T) {
 func TestTokenService_ValidateRefreshToken(t *testing.T) {
 	SetTokenServiceEnvForTesting(t)
 
-	ts := NewTokenService(config.NewConfig(), NewLoggerMock())
+	ts := NewTokenService(config.New(), NewLoggerMock())
 	type args struct {
 		ctx   context.Context
 		token string
