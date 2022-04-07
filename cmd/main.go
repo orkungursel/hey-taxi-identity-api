@@ -26,7 +26,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	config := config.NewConfig()
+	config := config.New()
 	logger := logger.New(config)
 	defer logger.Sync()
 
