@@ -11,10 +11,10 @@ import (
 )
 
 type Config struct {
-	AppName  string `napstructure:"app_name"`
-	LogLevel string `mapstructure:"level"`
-	DevMode  bool   `mapstructure:"devMode"`
-	Encoder  string `mapstructure:"encoder"`
+	AppName  string
+	LogLevel string
+	DevMode  bool
+	Encoder  string
 }
 
 type ILogger interface {
