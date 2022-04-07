@@ -1,76 +1,71 @@
 package config
 
 type Config struct {
-	App      App      `mapstructure:",squash"`
-	Server   Server   `mapstructure:",squash"`
-	Redis    Redis    `mapstructure:",squash"`
-	Mongo    Mongo    `mapstructure:",squash"`
-	Auth     Auth     `mapstructure:",squash"`
-	Jwt      Jwt      `mapstructure:",squash"`
-	Password Password `mapstructure:",squash"`
+	App    App
+	Server Server
+	Redis  Redis
+	Mongo  Mongo
+	Auth   Auth
+	Jwt    Jwt
 }
 
 type (
 	App struct {
-		Name string `mapstructure:"app_name"`
+		Name string `default:"HeyTaxi Identity API"`
 	}
 
 	Server struct {
-		Http ServerHttp `mapstructure:",squash"`
-		Grpc ServerGrpc `mapstructure:",squash"`
+		Http ServerHttp
+		Grpc ServerGrpc
 	}
 
 	ServerHttp struct {
-		Host            string `mapstructure:"server_http_host"`
-		Port            string `mapstructure:"server_http_port" default:"8080"`
-		BodyLimit       string `mapstructure:"server_http_body_limit"`
-		RequestTimeout  int    `mapstructure:"server_http_request_timeout"`
-		ShutdownTimeout int    `mapstructure:"server_http_shutdown_timeout"`
+		Host            string `default:""`
+		Port            string `default:"8080"`
+		BodyLimit       string `default:"1M"`
+		RequestTimeout  int    `default:"60"`
+		ShutdownTimeout int    `default:"5"`
 	}
 
 	ServerGrpc struct {
-		Host                  string `mapstructure:"server_grpc_host"`
-		Port                  string `mapstructure:"server_grpc_port" default:"50051"`
-		MaxConnectionIdle     int    `mapstructure:"server_grpc_max_connection_idle"`
-		Timeout               int    `mapstructure:"server_grpc_timeout"`
-		MaxConnectionAge      int    `mapstructure:"server_grpc_max_connection_age"`
-		MaxConnectionAgeGrace int    `mapstructure:"server_grpc_max_connection_age_grace"`
-		Time                  int    `mapstructure:"server_grpc_time"`
+		Host                  string `default:""`
+		Port                  string `default:"50051"`
+		MaxConnectionIdle     int    `default:"10"`
+		Timeout               int    `default:"10"`
+		MaxConnectionAge      int    `default:"10"`
+		MaxConnectionAgeGrace int    `default:"10"`
+		Time                  int    `default:"20"`
 	}
 
 	Redis struct {
-		Addr         string `mapstructure:"redis_addr"`
-		Password     string `mapstructure:"redis_password"`
-		DB           int    `mapstructure:"redis_db"`
-		DefaultDb    string `mapstructure:"redis_defaultdb"`
-		MinIdleConns int    `mapstructure:"redis_min_idle_conns"`
-		PoolSize     int    `mapstructure:"redis_pool_size"`
-		PoolTimeout  int    `mapstructure:"redis_pool_timeout"`
-		MaxRetries   int    `mapstructure:"redis_max_retries"`
+		Addr         string `default:"localhost:6379"`
+		Password     string `default:""`
+		DB           int    `default:""`
+		DefaultDb    string `default:""`
+		MinIdleConns int    `default:""`
+		PoolSize     int    `default:""`
+		PoolTimeout  int    `default:""`
+		MaxRetries   int    `default:"3"`
 	}
 
 	Mongo struct {
-		Uri               string `mapstructure:"mongo_uri"`
-		ConnectionTimeout int    `mapstructure:"mongo_connection_timeout"`
-		SocketTimeout     int    `mapstructure:"mongo_socket_timeout"`
+		Uri               string `default:"mongodb://root:root@localhost:27017"`
+		ConnectionTimeout int    `default:"3"`
+		SocketTimeout     int    `default:"3"`
 	}
 
 	Auth struct {
-		DatabaseName   string `mapstructure:"auth_database_name"`
-		CollectionName string `mapstructure:"auth_collection_name"`
+		DatabaseName   string `default:"auth"`
+		CollectionName string `default:"users"`
 	}
 
 	Jwt struct {
-		AccessTokenPrivateKeyFile  string `mapstructure:"jwt_access_token_private_key_file"`
-		AccessTokenPublicKeyFile   string `mapstructure:"jwt_access_token_public_key_file"`
-		AccessTokenExp             int    `mapstructure:"jwt_access_token_exp"`
-		RefreshTokenPrivateKeyFile string `mapstructure:"jwt_refresh_token_private_key_file"`
-		RefreshTokenPublicKeyFile  string `mapstructure:"jwt_refresh_token_public_key_file"`
-		RefreshTokenExp            int    `mapstructure:"jwt_refresh_token_exp"`
-		Issuer                     string `mapstructure:"jwt_issuer"`
-	}
-
-	Password struct {
-		HashSecret string `mapstructure:"password_hash_secret"`
+		AccessTokenExp             int    `default:"3600"`
+		RefreshTokenExp            int    `default:"1296000"`
+		Issuer                     string `default:"hey-taxi-identity-api"`
+		AccessTokenPrivateKeyFile  string `default:"/etc/certs/access-token-private-key.pem"`
+		AccessTokenPublicKeyFile   string `default:"/etc/certs/access-token-public-key.pem"`
+		RefreshTokenPrivateKeyFile string `default:"/etc/certs/refresh-token-private-key.pem"`
+		RefreshTokenPublicKeyFile  string `default:"/etc/certs/refresh-token-public-key.pem"`
 	}
 )

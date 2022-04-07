@@ -2,25 +2,17 @@ package config
 
 import (
 	"os"
+
+	"github.com/orkungursel/go-eco"
 )
 
-func NewConfig() *Config {
-	return NewConfigWithFile("")
-}
-
-func NewConfigWithFile(file string) *Config {
-	cm := NewManager()
-	cm.file = file
-
-	if err := cm.load(); err != nil {
+func New() *Config {
+	c := &Config{}
+	if err := eco.Unmarshal(c); err != nil {
 		panic(err)
 	}
 
-	if err := cm.unmarshal(); err != nil {
-		panic(err)
-	}
-
-	return cm.c
+	return c
 }
 
 // GetProfile returns current mode by reading environment variable.
@@ -33,10 +25,12 @@ func (c *Config) GetProfile() string {
 	return profile
 }
 
+// IsLocal returns true if current profile is local.
 func (c *Config) IsLocal() bool {
 	return c.GetProfile() == "local"
 }
 
+// IsProduction returns true if current profile is production.
 func (c *Config) IsProduction() bool {
 	return c.GetProfile() == "production"
 }
