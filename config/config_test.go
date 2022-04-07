@@ -1,149 +1,180 @@
 package config
 
 import (
-	"reflect"
 	"testing"
 )
 
-func TestOverrideEnvironments_WhenEnvFileExists(t *testing.T) {
-	wantAppName := "Foobar"
-	wantRedisAddr := "localhost2:6379"
-	wantServerHttpHost := "localhost"
-	wantAccessTokenPath := "/foo/bar/access_token.pem"
-
-	t.Setenv("APP_NAME", wantAppName)
-	t.Setenv("REDIS_ADDR", wantRedisAddr)
-	t.Setenv("SERVER_HTTP_HOST", wantServerHttpHost)
-	t.Setenv("JWT_ACCESS_TOKEN_PRIVATE_KEY_FILE", wantAccessTokenPath)
-
-	c := NewConfigWithFile("")
-
-	t.Run("override app_name", func(t *testing.T) {
-		if c.App.Name != wantAppName {
-			t.Errorf("c.App.Name = %v, want %v", c.App.Name, wantAppName)
-		}
-	})
-
-	t.Run("override redis_addr", func(t *testing.T) {
-		if c.Redis.Addr != wantRedisAddr {
-			t.Errorf("c.Redis.Addr = %v, want %v", c.Redis.Addr, wantRedisAddr)
-		}
-	})
-
-	t.Run("override server_http_host", func(t *testing.T) {
-		if c.Server.Http.Host != wantServerHttpHost {
-			t.Errorf("c.Server.Http.Host = %v, want %v", c.Server.Http.Host, wantServerHttpHost)
-		}
-	})
-
-	t.Run("override jwt", func(t *testing.T) {
-		if c.Jwt.AccessTokenPrivateKeyFile != wantAccessTokenPath {
-			t.Errorf("c.Redis.Addr = %v, want %v", c.Jwt.AccessTokenPrivateKeyFile, wantAccessTokenPath)
-		}
-	})
+func shouldPanic(t *testing.T, f func()) {
+	defer func() { recover() }()
+	f()
+	t.Errorf("should have panicked")
 }
 
-func TestOverrideEnvironments_WhenEnvFileNotExists(t *testing.T) {
-	wantAppName := "Foobar"
-	wantRedisAddr := "http://foo.bar"
-	wantServerHttpHost := "localhost"
-	wantAccessTokenPath := "/foo/bar/access_token.pem"
-
-	t.Setenv("APP_NAME", wantAppName)
-	t.Setenv("REDIS_ADDR", wantRedisAddr)
-	t.Setenv("SERVER_HTTP_HOST", wantServerHttpHost)
-	t.Setenv("JWT_ACCESS_TOKEN_PRIVATE_KEY_FILE", wantAccessTokenPath)
-
-	c := NewConfigWithFile("-")
-
-	t.Run("override app_name", func(t *testing.T) {
-		if c.App.Name != wantAppName {
-			t.Errorf("c.App.Name = %v, want %v", c.App.Name, wantAppName)
-		}
-	})
-
-	t.Run("override redis_addr", func(t *testing.T) {
-		if c.Redis.Addr != wantRedisAddr {
-			t.Errorf("c.Redis.Addr = %v, want %v", c.Redis.Addr, wantRedisAddr)
-		}
-	})
-
-	t.Run("override server_http_host", func(t *testing.T) {
-		if c.Server.Http.Host != wantServerHttpHost {
-			t.Errorf("c.Server.Http.Host = %v, want %v", c.Server.Http.Host, wantServerHttpHost)
-		}
-	})
-
-	t.Run("override jwt", func(t *testing.T) {
-		if c.Jwt.AccessTokenPrivateKeyFile != wantAccessTokenPath {
-			t.Errorf("c.Redis.Addr = %v, want %v", c.Jwt.AccessTokenPrivateKeyFile, wantAccessTokenPath)
-		}
-	})
-}
-
-func TestConfig_defaults(t *testing.T) {
+func TestNew(t *testing.T) {
 	tests := []struct {
-		name    string
-		want    *Config
-		envs    map[string]string
-		file    string
-		wantErr bool
+		name      string
+		env       map[string]string
+		want      func(t *testing.T, c *Config)
+		wantPanic bool
 	}{
 		{
-			name:    "defaults",
-			want:    defaults(),
-			file:    "not-exists",
-			wantErr: false,
+			name: "should set default values",
+			want: func(t *testing.T, c *Config) {
+				if c.App.Name != "HeyTaxi Identity API" {
+					t.Errorf("want App.Name = %q, got %q", "HeyTaxi Identity API", c.App.Name)
+				}
+				if c.Server.Http.Port != "8080" {
+					t.Errorf("want Server.Http.Port = %q, got %q", "8080", c.Server.Http.Port)
+				}
+				if c.Server.Http.BodyLimit != "1M" {
+					t.Errorf("want Server.Http.BodyLimit = %q, got %q", "1M", c.Server.Http.BodyLimit)
+				}
+				if c.Server.Http.RequestTimeout != 60 {
+					t.Errorf("want Server.Http.RequestTimeout = %d, got %d", 60, c.Server.Http.RequestTimeout)
+				}
+				if c.Server.Http.ShutdownTimeout != 5 {
+					t.Errorf("want Server.Http.ShutdownTimeout = %d, got %d", 5, c.Server.Http.ShutdownTimeout)
+				}
+				if c.Server.Grpc.Port != "50051" {
+					t.Errorf("want Server.Grpc.Port = %q, got %q", "50051", c.Server.Grpc.Port)
+				}
+			},
 		},
 		{
-			name:    "with custom envs",
-			file:    ".env-sample",
-			wantErr: true,
+			name: "should set env values",
+			env: map[string]string{
+				"APP_NAME":               "Custom App Name",
+				"SERVER_HTTP_HOST":       "localhost",
+				"SERVER_HTTP_PORT":       "8081",
+				"SERVER_HTTP_BODY_LIMIT": "2M",
+			},
+			want: func(t *testing.T, c *Config) {
+				if c.App.Name != "Custom App Name" {
+					t.Errorf("want App.Name = %q, got %q", "Custom App Name", c.App.Name)
+				}
+				if c.Server.Http.Host != "localhost" {
+					t.Errorf("want Server.Http.Host = %q, got %q", "localhost", c.Server.Http.Host)
+				}
+				if c.Server.Http.Port != "8081" {
+					t.Errorf("want Server.Http.Port = %q, got %q", "8081", c.Server.Http.Port)
+				}
+				if c.Server.Http.BodyLimit != "2M" {
+					t.Errorf("want Server.Http.BodyLimit = %q, got %q", "2M", c.Server.Http.BodyLimit)
+				}
+			},
+		},
+		{
+			name: "should panic if env value is invalid",
+			env: map[string]string{
+				"SERVER_HTTP_REQUEST_TIMEOUT": "aa",
+			},
+			wantPanic: true,
 		},
 	}
-
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if !tt.wantErr {
-				if got := NewConfigWithFile(tt.file); !reflect.DeepEqual(got, tt.want) {
-					t.Errorf("New() = %v, want %v", got, tt.want)
-				}
-			} else {
-				if got := NewConfigWithFile(tt.file); reflect.DeepEqual(got, tt.want) {
-					t.Errorf("New() = %v, want %v", got, tt.want)
-				}
+			for k, v := range tt.env {
+				t.Setenv(k, v)
+			}
+
+			if tt.wantPanic {
+				shouldPanic(t, func() {
+					New()
+				})
+				return
+			}
+
+			got := New()
+			tt.want(t, got)
+		})
+	}
+}
+
+func TestConfig_GetProfile(t *testing.T) {
+	tests := []struct {
+		name       string
+		profileEnv string
+		want       string
+	}{
+		{
+			name: "should return local profile by default",
+			want: "local",
+		},
+		{
+			name:       "should return profile from env",
+			profileEnv: "production",
+			want:       "production",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.profileEnv != "" {
+				t.Setenv("ACTIVE_PROFILE", tt.profileEnv)
+			}
+
+			c := New()
+			if got := c.GetProfile(); got != tt.want {
+				t.Errorf("Config.GetProfile() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestConfig_GetMode(t *testing.T) {
+func TestConfig_IsLocal(t *testing.T) {
 	tests := []struct {
-		name string
-		c    *Config
-		env  string
-		want string
+		name       string
+		profileEnv string
+		want       bool
 	}{
 		{
-			name: "should return development mode",
-			c:    NewConfigWithFile(""),
-			want: "local",
+			name: "should return true by default",
+			want: true,
 		},
 		{
-			name: "should return production mode",
-			c:    NewConfigWithFile(""),
-			want: "production",
-			env:  "production",
+			name:       "should return false if profile is not local",
+			profileEnv: "production",
+			want:       false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if tt.env != "" {
-				t.Setenv("ACTIVE_PROFILE", tt.env)
+			if tt.profileEnv != "" {
+				t.Setenv("ACTIVE_PROFILE", tt.profileEnv)
 			}
 
-			if got := tt.c.GetProfile(); got != tt.want {
-				t.Errorf("Config.GetMode() = %v, want %v", got, tt.want)
+			c := New()
+			if got := c.IsLocal(); got != tt.want {
+				t.Errorf("Config.IsLocal() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestConfig_IsProduction(t *testing.T) {
+	tests := []struct {
+		name       string
+		profileEnv string
+		want       bool
+	}{
+		{
+			name: "should return false by default",
+			want: false,
+		},
+		{
+			name:       "should return true if profile is production",
+			profileEnv: "production",
+			want:       true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.profileEnv != "" {
+				t.Setenv("ACTIVE_PROFILE", tt.profileEnv)
+			}
+
+			c := New()
+			if got := c.IsProduction(); got != tt.want {
+				t.Errorf("Config.IsProduction() = %v, want %v", got, tt.want)
 			}
 		})
 	}
