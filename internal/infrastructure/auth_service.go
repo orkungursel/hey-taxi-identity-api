@@ -158,17 +158,8 @@ func (s *AuthService) RefreshToken(ctx context.Context, r *app.RefreshTokenReque
 		return nil, err
 	}
 
-	refreshToken, err := s.ts.GenerateRefreshToken(ctx, user)
-	if err != nil {
-		s.logger.Warnf("failed to generate refresh token: %s", err)
-		return nil, err
-	}
-
-	return &app.SuccessAuthResponse{
-		UserDto:               *app.UserResponseFromUser(user),
-		AccessToken:           accessToken,
-		AccessTokenExpiresIn:  s.config.Jwt.AccessTokenExp,
-		RefreshToken:          refreshToken,
-		RefreshTokenExpiresIn: s.config.Jwt.RefreshTokenExp,
+	return &app.RefreshTokenResponse{
+		AccessToken:          accessToken,
+		AccessTokenExpiresIn: s.config.Jwt.AccessTokenExp,
 	}, nil
 }
