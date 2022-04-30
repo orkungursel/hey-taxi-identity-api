@@ -42,7 +42,7 @@ func (a *Controller) RegisterRoutes(e *echo.Group) {
 // @Accept       json
 // @Produce      json
 // @Param        payload  body      app.LoginRequest  true  "Payload"
-// @Success      200      {array}   app.SuccessAuthResponse
+// @Success      200      {array}   app.LoginResponse
 // @Failure      400  {object}  app.HTTPError
 // @Failure      500  {object}  app.HTTPError
 // @Router       /auth/login [post]
@@ -72,7 +72,7 @@ func (a *Controller) login() echo.HandlerFunc {
 // @Accept       json
 // @Produce      json
 // @Param        payload  body      app.RegisterRequest  true  "Payload"
-// @Success      200      {array}   app.SuccessAuthResponse
+// @Success      200      {array}   app.LoginResponse
 // @Failure      400      {object}  app.HTTPError
 // @Failure      500      {object}  app.HTTPError
 // @Router       /auth/register [post]
@@ -102,7 +102,7 @@ func (a *Controller) register() echo.HandlerFunc {
 // @Accept       json
 // @Produce      json
 // @Param        payload  body      app.RefreshTokenRequest  true  "Payload"
-// @Success      200  {array}   app.UserResponse
+// @Success      200      {array}   app.RefreshTokenResponse
 // @Failure      400      {object}  app.HTTPError
 // @Failure      500      {object}  app.HTTPError
 // @Router       /auth/refresh-token [post]
@@ -132,9 +132,9 @@ func (a *Controller) refreshToken() echo.HandlerFunc {
 // @Tags         Auth
 // @Accept       json
 // @Produce      json
-// @Success      200      {array}   app.UserResponse
+// @Success      200  {array}   app.UserResponse
 // @Failure      400      {object}  app.HTTPError
-// @Failure      401      {object}  app.HTTPError
+// @Failure      401  {object}  app.HTTPError
 // @Failure      500      {object}  app.HTTPError
 // @Router       /auth/me [get]
 // @Security     BearerAuth

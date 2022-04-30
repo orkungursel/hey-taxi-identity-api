@@ -102,7 +102,7 @@ func TestAuthService_Login(t *testing.T) {
 		name    string
 		args    args
 		svc     app.AuthService
-		want    *app.SuccessAuthResponse
+		want    *app.LoginResponse
 		wantErr bool
 	}{
 		{
@@ -112,7 +112,7 @@ func TestAuthService_Login(t *testing.T) {
 				ctx: ctx,
 				req: &app.LoginRequest{Email: dummyAuthUser.Email, Password: dummyAuthUser.Password},
 			},
-			want: &app.SuccessAuthResponse{
+			want: &app.LoginResponse{
 				UserDto:               *app.UserResponseFromUser(dummyAuthUser),
 				AccessToken:           "access_token",
 				RefreshToken:          "refresh_token",
@@ -206,7 +206,7 @@ func TestAuthService_Register(t *testing.T) {
 		name    string
 		args    args
 		svc     app.AuthService
-		want    *app.SuccessAuthResponse
+		want    *app.LoginResponse
 		wantErr bool
 	}{
 		{
@@ -216,7 +216,7 @@ func TestAuthService_Register(t *testing.T) {
 				ctx: ctx,
 				req: &app.RegisterRequest{Email: dummyAuthUser2.Email, Password: dummyAuthUser2.Password},
 			},
-			want: &app.SuccessAuthResponse{
+			want: &app.LoginResponse{
 				UserDto:               *app.UserResponseFromUser(dummyAuthUser2),
 				AccessToken:           "access_token",
 				RefreshToken:          "refresh_token",

@@ -32,7 +32,7 @@ func NewAuthService(config *config.Config, logger logger.ILogger, repo app.Repos
 }
 
 // Login is used to authenticate user
-func (s *AuthService) Login(ctx context.Context, r *app.LoginRequest) (*app.SuccessAuthResponse, error) {
+func (s *AuthService) Login(ctx context.Context, r *app.LoginRequest) (*app.LoginResponse, error) {
 	if err := app.Validate(r); err != nil {
 		s.logger.Debugf("invalid login request: %s", err)
 		return nil, err
@@ -63,7 +63,7 @@ func (s *AuthService) Login(ctx context.Context, r *app.LoginRequest) (*app.Succ
 		return nil, err
 	}
 
-	return &app.SuccessAuthResponse{
+	return &app.LoginResponse{
 		UserDto:               *app.UserResponseFromUser(user),
 		AccessToken:           accessToken,
 		AccessTokenExpiresIn:  s.config.Jwt.AccessTokenExp,
@@ -73,7 +73,7 @@ func (s *AuthService) Login(ctx context.Context, r *app.LoginRequest) (*app.Succ
 }
 
 // Register is used to register new user
-func (s *AuthService) Register(ctx context.Context, r *app.RegisterRequest) (*app.SuccessAuthResponse, error) {
+func (s *AuthService) Register(ctx context.Context, r *app.RegisterRequest) (*app.LoginResponse, error) {
 	if err := app.Validate(r); err != nil {
 		s.logger.Warnf("invalid register request: %s", err)
 		return nil, err
@@ -121,7 +121,7 @@ func (s *AuthService) Register(ctx context.Context, r *app.RegisterRequest) (*ap
 		return nil, err
 	}
 
-	return &app.SuccessAuthResponse{
+	return &app.LoginResponse{
 		UserDto:               *app.UserResponseFromUser(user),
 		AccessToken:           accessToken,
 		AccessTokenExpiresIn:  s.config.Jwt.AccessTokenExp,
@@ -140,7 +140,7 @@ func (s *AuthService) Me(ctx context.Context, uid string) (*app.UserResponse, er
 	return app.UserResponseFromUser(user), nil
 }
 
-func (s *AuthService) RefreshToken(ctx context.Context, r *app.RefreshTokenRequest) (*app.SuccessAuthResponse, error) {
+func (s *AuthService) RefreshToken(ctx context.Context, r *app.RefreshTokenRequest) (*app.RefreshTokenResponse, error) {
 	sub, err := s.ts.ValidateRefreshToken(ctx, r.Token)
 	if err != nil {
 		s.logger.Warnf("invalid refresh token: %s", err)

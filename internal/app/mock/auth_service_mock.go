@@ -36,10 +36,10 @@ func (m *MockAuthService) EXPECT() *MockAuthServiceMockRecorder {
 }
 
 // Login mocks base method.
-func (m *MockAuthService) Login(ctx context.Context, r *app.LoginRequest) (*app.SuccessAuthResponse, error) {
+func (m *MockAuthService) Login(ctx context.Context, r *app.LoginRequest) (*app.LoginResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Login", ctx, r)
-	ret0, _ := ret[0].(*app.SuccessAuthResponse)
+	ret0, _ := ret[0].(*app.LoginResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -66,10 +66,10 @@ func (mr *MockAuthServiceMockRecorder) Me(ctx, uid interface{}) *gomock.Call {
 }
 
 // RefreshToken mocks base method.
-func (m *MockAuthService) RefreshToken(ctx context.Context, r *app.RefreshTokenRequest) (*app.SuccessAuthResponse, error) {
+func (m *MockAuthService) RefreshToken(ctx context.Context, r *app.RefreshTokenRequest) (*app.RefreshTokenResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RefreshToken", ctx, r)
-	ret0, _ := ret[0].(*app.SuccessAuthResponse)
+	ret0, _ := ret[0].(*app.RefreshTokenResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -81,10 +81,10 @@ func (mr *MockAuthServiceMockRecorder) RefreshToken(ctx, r interface{}) *gomock.
 }
 
 // Register mocks base method.
-func (m *MockAuthService) Register(ctx context.Context, r *app.RegisterRequest) (*app.SuccessAuthResponse, error) {
+func (m *MockAuthService) Register(ctx context.Context, r *app.RegisterRequest) (*app.LoginResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Register", ctx, r)
-	ret0, _ := ret[0].(*app.SuccessAuthResponse)
+	ret0, _ := ret[0].(*app.LoginResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

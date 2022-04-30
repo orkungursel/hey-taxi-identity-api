@@ -8,14 +8,20 @@ type HTTPError struct {
 	Internal error       `json:"-"` // Stores the error returned by an external dependency
 } // @name HTTPError
 
-// SuccessAuthResponse is the response of LoginRequest
-type SuccessAuthResponse struct {
+// LoginResponse is the response of LoginRequest
+type LoginResponse struct {
 	UserDto               UserResponse `json:"user"`
 	AccessToken           string       `json:"access_token"`
 	AccessTokenExpiresIn  int          `json:"access_token_expires_in"`
 	RefreshToken          string       `json:"refresh_token"`
 	RefreshTokenExpiresIn int          `json:"refresh_token_expires_in"`
-} // @name SuccessAuthResponse
+} // @name LoginResponse
+
+// RefreshTokenResponse is the response of RefreshTokenRequest
+type RefreshTokenResponse struct {
+	AccessToken          string `json:"access_token"`
+	AccessTokenExpiresIn int    `json:"access_token_expires_in"`
+} // @name RefreshTokenResponse
 
 type UserResponse struct {
 	Id        string `json:"id"`
