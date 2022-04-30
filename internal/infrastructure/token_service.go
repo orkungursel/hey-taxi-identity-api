@@ -114,6 +114,24 @@ func (t *TokenService) GenerateAccessToken(ctx context.Context, user *model.User
 	return jwt.NewWithClaims(jwt.SigningMethodRS256, claims).SignedString(t.accessTokenPrivateKey)
 }
 
+// ValidateAccessTokenFromRequest validates access token from request
+func (t *TokenService) ValidateAccessTokenFromRequest(ctx context.Context, r *http.Request) (app.Claims, error) {
+	token := r.Header.Get("Authorization")
+	if token == "" {
+		return nil, errors.New("token is empty")
+	}
+
+	// remove bearer prefix
+	token = token[7:]
+
+	claims, err := t.ParseToken(ctx, token)
+	if err != nil {
+		return nil, err
+	}
+
+	return claims, nil
+}
+
 // GenerateRefreshToken generates a new refresh token
 func (t *TokenService) GenerateRefreshToken(ctx context.Context, user *model.User) (string, error) {
 	sub := user.GetIdString()
@@ -132,25 +150,14 @@ func (t *TokenService) GenerateRefreshToken(ctx context.Context, user *model.Use
 		Id:        "custom-id",
 	}
 
-	return jwt.NewWithClaims(jwt.SigningMethodRS256, claims).SignedString(t.accessTokenPrivateKey) // TODO: use refresh token private key
-}
-
-// ExtractToken extracts token from http request
-func (t *TokenService) ValidateAccessTokenFromRequest(ctx context.Context, r *http.Request) (app.Claims, error) {
-	token := r.Header.Get("Authorization")
-	if token == "" {
-		return nil, errors.New("token is empty")
-	}
-
-	// remove bearer prefix
-	token = token[7:]
-
-	claims, err := t.ParseToken(ctx, token)
+	token, err := jwt.NewWithClaims(jwt.SigningMethodRS256, claims).SignedString(t.refreshTokenPrivateKey)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return claims, nil
+	//TODO add to redis
+
+	return token, err
 }
 
 func (t *TokenService) ValidateRefreshToken(ctx context.Context, token string) (string, error) {
@@ -178,8 +185,15 @@ func (t *TokenService) ValidateRefreshToken(ctx context.Context, token string) (
 
 	sub := claims["sub"].(string)
 	if sub == "" {
-		return "", errors.New("sub is empty")
+		return "", errors.New("subject is empty")
 	}
+
+	jti := claims["jti"].(string)
+	if jti == "" {
+		return "", errors.New("jti is empty")
+	}
+
+	//TODO check in redis
 
 	return sub, nil
 }
