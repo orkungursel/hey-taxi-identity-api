@@ -7,7 +7,7 @@ services:
       - "8080:8080"
       - "50051:50051"
     environment:
-      - MONGO_URI=mongodb://root:root@mongo:27017
+      - MONGO_URI=mongodb://mongo:27017
     volumes:
       - "./certs/private.pem:/etc/certs/access-token-private-key.pem:ro"
       - "./certs/public.pem:/etc/certs/access-token-public-key.pem:ro"
@@ -27,9 +27,6 @@ services:
       - "27017:27017"
     volumes:
       - mongo-volume:/data/db
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=root
     networks:
       - hey-taxi-network
 

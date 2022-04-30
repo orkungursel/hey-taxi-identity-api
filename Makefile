@@ -1,5 +1,7 @@
-export SERVER_HTTP_HOST=localhost
-export SERVER_GRPC_HOST=localhost
+ifneq (,$(wildcard ./.env))
+    include .env
+    export
+endif
 
 run:
 	cd ./cmd/ && \
@@ -9,6 +11,9 @@ build:
 	rm -rf ./bin/ && \
 	mkdir -p ./bin/ && \
 	go build -ldflags="-s -w" -trimpath -o bin/main cmd/main.go
+
+build-run:
+	./bin/main
 
 protoc-gen: protoc-gen-user-details
 

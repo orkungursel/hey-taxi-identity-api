@@ -25,11 +25,12 @@ Content-Type: {{contentType}}
 {
   "token": "{{refreshToken}}"
 }
+
 ### Register
 POST {{url}}/auth/register
 Content-Type: {{contentType}}
 
 {
-  "email": "foo@bar.com",
+  "email": "foo2@bar.com",
   "password": "password"
 }
