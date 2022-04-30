@@ -17,12 +17,32 @@ definitions:
     - email
     - password
     type: object
+  LoginResponse:
+    properties:
+      access_token:
+        type: string
+      access_token_expires_in:
+        type: integer
+      refresh_token:
+        type: string
+      refresh_token_expires_in:
+        type: integer
+      user:
+        $ref: '#/definitions/UserResponse'
+    type: object
   RefreshTokenRequest:
     properties:
       token:
         type: string
     required:
     - token
+    type: object
+  RefreshTokenResponse:
+    properties:
+      access_token:
+        type: string
+      access_token_expires_in:
+        type: integer
     type: object
   RegisterResponse:
     properties:
@@ -36,19 +56,6 @@ definitions:
     required:
     - email
     - password
-    type: object
-  SuccessAuthResponse:
-    properties:
-      access_token:
-        type: string
-      access_token_expires_in:
-        type: integer
-      refresh_token:
-        type: string
-      refresh_token_expires_in:
-        type: integer
-      user:
-        $ref: '#/definitions/UserResponse'
     type: object
   UserResponse:
     properties:
@@ -92,7 +99,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/SuccessAuthResponse'
+              $ref: '#/definitions/LoginResponse'
             type: array
         "400":
           description: Bad Request
@@ -155,7 +162,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/UserResponse'
+              $ref: '#/definitions/RefreshTokenResponse'
             type: array
         "400":
           description: Bad Request
@@ -189,7 +196,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/SuccessAuthResponse'
+              $ref: '#/definitions/LoginResponse'
             type: array
         "400":
           description: Bad Request

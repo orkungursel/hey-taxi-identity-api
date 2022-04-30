@@ -41,7 +41,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/SuccessAuthResponse"
+                                "$ref": "#/definitions/LoginResponse"
                             }
                         }
                     },
@@ -144,7 +144,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/UserResponse"
+                                "$ref": "#/definitions/RefreshTokenResponse"
                             }
                         }
                     },
@@ -193,7 +193,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/SuccessAuthResponse"
+                                "$ref": "#/definitions/LoginResponse"
                             }
                         }
                     },
@@ -238,6 +238,26 @@
                 }
             }
         },
+        "LoginResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "access_token_expires_in": {
+                    "type": "integer"
+                },
+                "refresh_token": {
+                    "type": "string"
+                },
+                "refresh_token_expires_in": {
+                    "type": "integer"
+                },
+                "user": {
+                    "$ref": "#/definitions/UserResponse"
+                }
+            }
+        },
         "RefreshTokenRequest": {
             "type": "object",
             "required": [
@@ -246,6 +266,17 @@
             "properties": {
                 "token": {
                     "type": "string"
+                }
+            }
+        },
+        "RefreshTokenResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "access_token_expires_in": {
+                    "type": "integer"
                 }
             }
         },
@@ -264,26 +295,6 @@
                     "type": "string",
                     "maxLength": 60,
                     "minLength": 6
-                }
-            }
-        },
-        "SuccessAuthResponse": {
-            "type": "object",
-            "properties": {
-                "access_token": {
-                    "type": "string"
-                },
-                "access_token_expires_in": {
-                    "type": "integer"
-                },
-                "refresh_token": {
-                    "type": "string"
-                },
-                "refresh_token_expires_in": {
-                    "type": "integer"
-                },
-                "user": {
-                    "$ref": "#/definitions/UserResponse"
                 }
             }
         },

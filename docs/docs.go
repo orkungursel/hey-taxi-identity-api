@@ -50,7 +50,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/SuccessAuthResponse"
+                                "$ref": "#/definitions/LoginResponse"
                             }
                         }
                     },
@@ -153,7 +153,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/UserResponse"
+                                "$ref": "#/definitions/RefreshTokenResponse"
                             }
                         }
                     },
@@ -202,7 +202,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/SuccessAuthResponse"
+                                "$ref": "#/definitions/LoginResponse"
                             }
                         }
                     },
@@ -247,6 +247,26 @@ const docTemplate = `{
                 }
             }
         },
+        "LoginResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "access_token_expires_in": {
+                    "type": "integer"
+                },
+                "refresh_token": {
+                    "type": "string"
+                },
+                "refresh_token_expires_in": {
+                    "type": "integer"
+                },
+                "user": {
+                    "$ref": "#/definitions/UserResponse"
+                }
+            }
+        },
         "RefreshTokenRequest": {
             "type": "object",
             "required": [
@@ -255,6 +275,17 @@ const docTemplate = `{
             "properties": {
                 "token": {
                     "type": "string"
+                }
+            }
+        },
+        "RefreshTokenResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "access_token_expires_in": {
+                    "type": "integer"
                 }
             }
         },
@@ -273,26 +304,6 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 60,
                     "minLength": 6
-                }
-            }
-        },
-        "SuccessAuthResponse": {
-            "type": "object",
-            "properties": {
-                "access_token": {
-                    "type": "string"
-                },
-                "access_token_expires_in": {
-                    "type": "integer"
-                },
-                "refresh_token": {
-                    "type": "string"
-                },
-                "refresh_token_expires_in": {
-                    "type": "integer"
-                },
-                "user": {
-                    "$ref": "#/definitions/UserResponse"
                 }
             }
         },
