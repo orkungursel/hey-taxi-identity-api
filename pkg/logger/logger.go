@@ -255,6 +255,6 @@ func (l *appLogger) EchoCtx(c echo.Context, start time.Time) {
 	case n >= 300:
 		l.logger.Info("Redirecting", fields...)
 	default:
-		//l.logger.Info("Success", fields...)
+		l.logger.Info("Success", fields...)
 	}
 }
