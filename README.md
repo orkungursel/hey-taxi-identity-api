@@ -14,4 +14,6 @@
 
 ## More Information
 
+Please check out the parent repository for more information about whole project: [hey-taxi](https://github.com/orkungursel/hey-taxi)
+
 Details will be added soon.
